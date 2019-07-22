@@ -1,0 +1,58 @@
+ext {
+    /**
+     * Builds app version using latest repository tag
+     * Tag should be a semantic version of major/minor at least
+     * Function takes number of commits since last tag and uses it to calculate patch number
+     * - If patch is omitted in tag - uses number of commits
+     * - If patch version set in tag - pluses number of commits to patch number
+     * @returns Semantic version string
+     */
+    buildVersionName = {
+        def descriptions = grgit.describe(match: ["v[0-9]*"]) =~ /^v?(\d+)\.(\d+)\.?(\d*)-?(\d*)/
+        if (descriptions.getCount() < 1) {
+            throw new GradleException('Git description does not have any version info. Make sure you have a semver tag (v1.2) or (v1.2.3) in a repository.')
+        }
+        def description = descriptions[0]
+        int major = description[1].toInteger()
+        int minor = description[2].toInteger()
+        int patch = "" != description[3] ? description[3].toInteger() : 0
+        int changes = "" != description[4] ? description[4].toInteger() : 0
+
+        def version = "$major.$minor.${patch + changes}"
+
+        logger.info('Version evaluated using Git', version)
+
+        version
+    }
+
+    /**
+     * Builds version code using [buildVersionName]
+     * @returns Integer version code
+     */
+    buildVersionCode = {
+        /*
+            Max version code (INT32) is 214 748 3647
+            Spaces denote positions of:
+            - major
+            - minor
+            - build
+         */
+        def (major, minor, patch) = buildVersionName().tokenize('.').collect { it.toInteger() }
+
+        if (major > 214) {
+            throw new GradleException('Major version exhausted: version greater than 214 not supported')
+        }
+        if (minor > 999) {
+            throw new GradleException('Minor version exhausted: version greater than 999 not supported')
+        }
+        if (patch > 9999) {
+            throw new GradleException('Patch version exhausted: version greater than 9999 not supported')
+        }
+
+        int version = major * 10000000 + minor * 10000 + patch
+
+        logger.info('Version code evaluated using Git', version)
+
+        version
+    }
+}
