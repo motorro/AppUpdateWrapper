@@ -16,6 +16,6 @@ open class TestAppTest{
     /**
      * Application instance
      */
-    protected val application: Application
+    val application: Application
         get() = ApplicationProvider.getApplicationContext()
 }

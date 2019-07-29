@@ -19,11 +19,6 @@ class AppUpdateException(message: String, cause: Throwable?): RuntimeException(m
         const val ERROR_UPDATE_TYPE_NOT_ALLOWED = "Requested update type not allowed for this update"
 
         /**
-         * Requested update type is not supported
-         */
-        const val ERROR_UNSUPPORTED_UPDATE_TYPE = "Unsupported update type"
-
-        /**
          * An update has failed
          */
         const val ERROR_UPDATE_FAILED = "Update failed"
