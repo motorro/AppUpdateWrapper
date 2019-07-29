@@ -24,7 +24,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Initial state
      */
-    internal class Initial : AppUpdateState() {
+    internal class Initial : ImmediateUpdate() {
         /**
          * Handles lifecycle `onStart`
          */
@@ -37,15 +37,19 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Checks for update
      */
-    internal class Checking: AppUpdateState() {
+    internal class Checking: ImmediateUpdate() {
         /*
          * Set to true on [onStop] to prevent view interaction
          * as there is no way to abort task
          */
         private var stopped: Boolean = false
 
+        /**
+         * Handles lifecycle `onStart`
+         */
         override fun onStart() {
             super.onStart()
+            stopped = false
             stateMachine.updateManager
                 .appUpdateInfo
                 .addOnCompleteListener {
@@ -66,6 +70,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
         override fun onStop() {
             super.onStop()
             stopped = true
+            stateMachine.setUpdateState(Initial())
         }
 
         /**
@@ -91,7 +96,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
      * Updates application
      * @param updateInfo Update info to start imeediate update
      */
-    internal class Update(private val updateInfo: AppUpdateInfo): AppUpdateState() {
+    internal class Update(private val updateInfo: AppUpdateInfo): ImmediateUpdate() {
         /**
          * Handles lifecycle `onResume`
          */
@@ -111,7 +116,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Update failed
      */
-    internal class Failed(private val error: AppUpdateException) : AppUpdateState() {
+    internal class Failed(private val error: AppUpdateException) : ImmediateUpdate() {
         /**
          * Handles lifecycle `onResume`
          */
