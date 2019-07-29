@@ -3,57 +3,62 @@ package com.motorro.appupdatewrapper
 /**
  * Application update state interface
  */
-abstract class AppUpdateState {
+internal abstract class AppUpdateState: AppUpdateWrapper {
     /**
-     * Update host
-     * @see AppUpdateHost.setState
+     * Update stateMachine
+     * @see AppUpdateStateMachine.setUpdateState
      */
-    internal lateinit var host: AppUpdateHost
+    internal lateinit var stateMachine: AppUpdateStateMachine
 
     /**
-     * Executes [block] if view available
+     * Executes [block] with update view
      */
-    protected fun ifViewAvailable(block: AppUpdateView.() -> Unit) {
-        host.getView()?.block()
+    protected fun withUpdateView(block: AppUpdateView.() -> Unit) {
+        stateMachine.view.block()
     }
 
     /**
      * Handles lifecycle `onStart`
      */
-    internal open fun onStart() = Unit
+    open fun onStart() = Unit
 
     /**
      * Handles lifecycle `onStop`
      */
-    internal open fun onStop() = Unit
+    open fun onStop() = Unit
 
     /**
      * Handles lifecycle `onPause`
      */
-    internal open fun onPause() = Unit
+    open fun onPause() = Unit
 
     /**
      * Handles lifecycle `onResume`
      */
-    internal open fun onResume() = Unit
+    open fun onResume() = Unit
 
     /**
      * Checks activity result and returns `true` if result is an update result and was handled
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
-    open fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean = false
+    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean = false
 
     /**
      * Cancels update installation
      * Call when update is downloaded and user cancelled app restart
      * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
      */
-    open fun userCanceledUpdate() = Unit
+    override fun userCanceledUpdate() = Unit
 
     /**
      * Completes update
      * Call when update is downloaded and user confirmed app restart
      * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
      */
-    open fun userConfirmedUpdate() = Unit
+    override fun userConfirmedUpdate() = Unit
 }
+
+/**
+ * Default update state that does nothing
+ */
+internal object NONE: AppUpdateState()

@@ -10,7 +10,17 @@ import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FA
 /**
  * Immediate update flow
  */
-sealed class ImmediateUpdate: AppUpdateState() {
+internal sealed class ImmediateUpdate: AppUpdateState() {
+    companion object {
+        /**
+         * Starts immediate update flow
+         * @param stateMachine Application update stateMachine state-machine
+         */
+        fun start(stateMachine: AppUpdateStateMachine) {
+            stateMachine.setUpdateState(Initial())
+        }
+    }
+
     /**
      * Initial state
      */
@@ -20,7 +30,7 @@ sealed class ImmediateUpdate: AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
-            host.setState(Checking())
+            stateMachine.setUpdateState(Checking())
         }
     }
 
@@ -36,7 +46,7 @@ sealed class ImmediateUpdate: AppUpdateState() {
 
         override fun onStart() {
             super.onStart()
-            host.updateManager
+            stateMachine.updateManager
                 .appUpdateInfo
                 .addOnCompleteListener {
                     if (!stopped) {
@@ -62,7 +72,7 @@ sealed class ImmediateUpdate: AppUpdateState() {
          * Transfers to failed state
          */
         private fun reportUpdateFailure(appUpdateException: AppUpdateException) {
-            host.setState(Failed(appUpdateException))
+            stateMachine.setUpdateState(Failed(appUpdateException))
         }
 
         /**
@@ -73,7 +83,7 @@ sealed class ImmediateUpdate: AppUpdateState() {
                 UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> Update(appUpdateInfo)
                 else -> Failed(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
             }
-            host.setState(state)
+            stateMachine.setUpdateState(state)
         }
     }
 
@@ -87,8 +97,8 @@ sealed class ImmediateUpdate: AppUpdateState() {
          */
         override fun onResume() {
             super.onResume()
-            ifViewAvailable {
-                host.updateManager.startUpdateFlowForResult(
+            withUpdateView {
+                stateMachine.updateManager.startUpdateFlowForResult(
                     updateInfo,
                     AppUpdateType.IMMEDIATE,
                     activity,
@@ -113,7 +123,7 @@ sealed class ImmediateUpdate: AppUpdateState() {
         /**
          * Notifies view error has occurred and resets update
          */
-        private fun reportUpdateFailure() = ifViewAvailable {
+        private fun reportUpdateFailure() = withUpdateView {
             fail(error)
         }
     }
