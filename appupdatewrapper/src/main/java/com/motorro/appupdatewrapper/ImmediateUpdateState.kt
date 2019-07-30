@@ -12,7 +12,7 @@ import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TY
 /**
  * Immediate update flow
  */
-internal sealed class ImmediateUpdate: AppUpdateState() {
+internal sealed class ImmediateUpdateState: AppUpdateState() {
     companion object {
         /**
          * Starts immediate update flow
@@ -26,7 +26,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Initial state
      */
-    internal class Initial : ImmediateUpdate() {
+    internal class Initial : ImmediateUpdateState() {
         /**
          * Handles lifecycle `onStart`
          */
@@ -39,7 +39,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Checks for update
      */
-    internal class Checking: ImmediateUpdate() {
+    internal class Checking: ImmediateUpdateState() {
         /*
          * Set to true on [onStop] to prevent view interaction
          * as there is no way to abort task
@@ -102,7 +102,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
      * Updates application
      * @param updateInfo Update info to start imeediate update
      */
-    internal class Update(private val updateInfo: AppUpdateInfo): ImmediateUpdate() {
+    internal class Update(private val updateInfo: AppUpdateInfo): ImmediateUpdateState() {
         /**
          * Handles lifecycle `onResume`
          */
@@ -123,7 +123,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Update failed
      */
-    internal class Failed(@VisibleForTesting val error: AppUpdateException) : ImmediateUpdate() {
+    internal class Failed(@VisibleForTesting val error: AppUpdateException) : ImmediateUpdateState() {
         /**
          * Handles lifecycle `onResume`
          */
@@ -139,7 +139,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
     /**
      * Completes the update sequence
      */
-    internal class Done: ImmediateUpdate() {
+    internal class Done: ImmediateUpdateState() {
         /**
          * Handles lifecycle `onStart`
          */

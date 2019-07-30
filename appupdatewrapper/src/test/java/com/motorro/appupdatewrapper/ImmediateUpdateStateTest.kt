@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-class ImmediateUpdateTest: TestAppTest() {
+class ImmediateUpdateStateTest: TestAppTest() {
     private lateinit var activity: Activity
     private lateinit var view: AppUpdateView
     private lateinit var stateMachine: AppUpdateStateMachine
@@ -34,26 +34,26 @@ class ImmediateUpdateTest: TestAppTest() {
         }
     }
 
-    private fun ImmediateUpdate.init() = this.apply {
-        stateMachine = this@ImmediateUpdateTest.stateMachine
+    private fun ImmediateUpdateState.init() = this.apply {
+        stateMachine = this@ImmediateUpdateStateTest.stateMachine
     }
 
     @Test
     fun whenStartedSetsInitialState() {
-        ImmediateUpdate.start(stateMachine)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Initial })
+        ImmediateUpdateState.start(stateMachine)
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Initial })
     }
 
     @Test
     fun initialStateStartsUpdateOnStart() {
-        val state = ImmediateUpdate.Initial().init()
+        val state = ImmediateUpdateState.Initial().init()
         state.onStart()
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Checking })
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Checking })
     }
 
     @Test
     fun checkingStateWillCheckUpdateOnStart() {
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         verify(updateManager).appUpdateInfo
     }
@@ -62,9 +62,9 @@ class ImmediateUpdateTest: TestAppTest() {
     fun checkingStateWillSetUpdateStateIfUpdateFound() {
         updateManager.setUpdateAvailable(100500)
         updateManager.partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Update })
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Update })
     }
 
     @Test
@@ -79,10 +79,10 @@ class ImmediateUpdateTest: TestAppTest() {
         }
         whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
 
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         testTask.succeed(updateInfo)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Update })
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Update })
     }
 
     @Test
@@ -94,12 +94,12 @@ class ImmediateUpdateTest: TestAppTest() {
         }
         whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
 
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         testTask.fail(error)
         argumentCaptor<AppUpdateState>().apply {
             verify(stateMachine).setUpdateState(capture())
-            val newState = firstValue as ImmediateUpdate.Failed
+            val newState = firstValue as ImmediateUpdateState.Failed
             val stateError = newState.error
             assertEquals(AppUpdateException.ERROR_UPDATE_FAILED, stateError.message)
             assertEquals(error, stateError.cause)
@@ -119,12 +119,12 @@ class ImmediateUpdateTest: TestAppTest() {
         }
         whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
 
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         testTask.succeed(updateInfo)
         argumentCaptor<AppUpdateState>().apply {
             verify(stateMachine).setUpdateState(capture())
-            val newState = firstValue as ImmediateUpdate.Failed
+            val newState = firstValue as ImmediateUpdateState.Failed
             val stateError = newState.error
             assertEquals(AppUpdateException.ERROR_UPDATE_TYPE_NOT_ALLOWED, stateError.message)
         }
@@ -142,12 +142,12 @@ class ImmediateUpdateTest: TestAppTest() {
         }
         whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
 
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         testTask.succeed(updateInfo)
         argumentCaptor<AppUpdateState>().apply {
             verify(stateMachine).setUpdateState(capture())
-            val newState = firstValue as ImmediateUpdate.Failed
+            val newState = firstValue as ImmediateUpdateState.Failed
             val stateError = newState.error
             assertEquals(AppUpdateException.ERROR_NO_IMMEDIATE_UPDATE, stateError.message)
         }
@@ -165,13 +165,13 @@ class ImmediateUpdateTest: TestAppTest() {
         }
         whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
 
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         state.onStop()
         testTask.succeed(updateInfo)
-        verify(stateMachine).setUpdateState(any<ImmediateUpdate.Initial>())
-        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdate.Update>())
-        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdate.Failed>())
+        verify(stateMachine).setUpdateState(any<ImmediateUpdateState.Initial>())
+        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdateState.Update>())
+        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdateState.Failed>())
     }
 
     @Test
@@ -183,13 +183,13 @@ class ImmediateUpdateTest: TestAppTest() {
         }
         whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
 
-        val state = ImmediateUpdate.Checking().init()
+        val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         state.onStop()
         testTask.fail(error)
-        verify(stateMachine).setUpdateState(any<ImmediateUpdate.Initial>())
-        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdate.Update>())
-        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdate.Failed>())
+        verify(stateMachine).setUpdateState(any<ImmediateUpdateState.Initial>())
+        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdateState.Update>())
+        verify(stateMachine, never()).setUpdateState(any<ImmediateUpdateState.Failed>())
     }
 
     @Test
@@ -199,21 +199,21 @@ class ImmediateUpdateTest: TestAppTest() {
             InstallStatus.UNKNOWN
         )
 
-        val state = ImmediateUpdate.Update(updateInfo).init()
+        val state = ImmediateUpdateState.Update(updateInfo).init()
         state.onResume()
 
         assertTrue(updateManager.isImmediateFlowVisible)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Done })
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Done })
     }
 
     @Test
     fun failedStateWillFailOnResume() {
         val error = AppUpdateException(AppUpdateException.ERROR_NO_IMMEDIATE_UPDATE)
 
-        val state = ImmediateUpdate.Failed(error).init()
+        val state = ImmediateUpdateState.Failed(error).init()
         state.onResume()
 
         verify(view).fail(error)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Done })
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Done })
     }
 }
