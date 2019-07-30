@@ -104,10 +104,10 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
      */
     internal class Update(private val updateInfo: AppUpdateInfo): ImmediateUpdate() {
         /**
-         * Handles lifecycle `onStart`
+         * Handles lifecycle `onResume`
          */
-        override fun onStart() {
-            super.onStart()
+        override fun onResume() {
+            super.onResume()
             withUpdateView {
                 stateMachine.updateManager.startUpdateFlowForResult(
                     updateInfo,
@@ -115,6 +115,7 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
                     activity,
                     REQUEST_CODE_UPDATE
                 )
+                stateMachine.setUpdateState(Done())
             }
         }
     }
@@ -124,12 +125,28 @@ internal sealed class ImmediateUpdate: AppUpdateState() {
      */
     internal class Failed(@VisibleForTesting val error: AppUpdateException) : ImmediateUpdate() {
         /**
+         * Handles lifecycle `onResume`
+         */
+        override fun onResume() {
+            super.onResume()
+            withUpdateView {
+                fail(error)
+                stateMachine.setUpdateState(Done())
+            }
+        }
+    }
+
+    /**
+     * Completes the update sequence
+     */
+    internal class Done: ImmediateUpdate() {
+        /**
          * Handles lifecycle `onStart`
          */
         override fun onStart() {
             super.onStart()
             withUpdateView {
-                fail(error)
+                complete()
             }
         }
     }

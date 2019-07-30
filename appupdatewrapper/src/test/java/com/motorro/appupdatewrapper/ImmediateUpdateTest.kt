@@ -193,25 +193,27 @@ class ImmediateUpdateTest: TestAppTest() {
     }
 
     @Test
-    fun updatingStateWillStartImmediateUpdateOnStart() {
+    fun updatingStateWillStartImmediateUpdateOnResume() {
         val updateInfo = createUpdateInfo(
             UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS,
             InstallStatus.UNKNOWN
         )
 
         val state = ImmediateUpdate.Update(updateInfo).init()
-        state.onStart()
+        state.onResume()
 
         assertTrue(updateManager.isImmediateFlowVisible)
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Done })
     }
 
     @Test
-    fun failedStateWillFailOnStart() {
+    fun failedStateWillFailOnResume() {
         val error = AppUpdateException(AppUpdateException.ERROR_NO_IMMEDIATE_UPDATE)
 
         val state = ImmediateUpdate.Failed(error).init()
-        state.onStart()
+        state.onResume()
 
         verify(view).fail(error)
+        verify(stateMachine).setUpdateState(check { it is ImmediateUpdate.Done })
     }
 }
