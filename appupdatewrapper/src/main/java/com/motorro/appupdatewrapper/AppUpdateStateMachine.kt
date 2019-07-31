@@ -2,7 +2,7 @@ package com.motorro.appupdatewrapper
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event.*
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.google.android.play.core.appupdate.AppUpdateManager
 
@@ -28,19 +28,24 @@ internal interface AppUpdateStateMachine {
 
 /**
  * Manages state transition and component lifecycle
- * @param lifecycleOwner Component lifecycle owner
+ * @param lifecycle Component lifecycle
  * @param updateManager AppUpdateManager instance
  * @param view Application update view interface
  */
 internal class AppUpdateLifecycleStateMachine(
-    private val lifecycleOwner: LifecycleOwner,
+    private val lifecycle: Lifecycle,
     override val updateManager: AppUpdateManager,
     override val view: AppUpdateView
-): AppUpdateStateMachine, AppUpdateWrapper {
+): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver {
     /**
      * Current update state
      */
-    private var currentUpdateState: AppUpdateState = NONE
+    private var currentUpdateState: AppUpdateState
+
+    init {
+        currentUpdateState = NONE
+        lifecycle.addObserver(this)
+    }
 
     /**
      * Sets new update state
@@ -49,7 +54,7 @@ internal class AppUpdateLifecycleStateMachine(
         newState.stateMachine = this
         currentUpdateState = newState
 
-        with(lifecycleOwner.lifecycle.currentState) {
+        with(lifecycle.currentState) {
             if (isAtLeast(Lifecycle.State.STARTED)) {
                 newState.onStart()
             }

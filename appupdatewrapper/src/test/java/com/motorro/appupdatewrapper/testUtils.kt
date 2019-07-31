@@ -6,7 +6,7 @@ import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.tasks.OnFailureListener
 import com.google.android.play.core.tasks.OnSuccessListener
 import com.google.android.play.core.tasks.Task
-import com.nhaarman.mockito_kotlin.spy
+import com.nhaarman.mockitokotlin2.spy
 
 const val APP_PACKAGE = "com.motorro.appupdatewrapper"
 const val APP_VERSION = 100500

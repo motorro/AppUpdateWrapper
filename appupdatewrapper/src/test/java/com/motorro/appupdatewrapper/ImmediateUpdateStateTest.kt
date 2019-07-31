@@ -1,20 +1,20 @@
 package com.motorro.appupdatewrapper
 
 import android.app.Activity
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ImmediateUpdateStateTest: TestAppTest() {
     private lateinit var activity: Activity
     private lateinit var view: AppUpdateView
@@ -41,14 +41,14 @@ class ImmediateUpdateStateTest: TestAppTest() {
     @Test
     fun whenStartedSetsInitialState() {
         ImmediateUpdateState.start(stateMachine)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Initial })
+        verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Initial } })
     }
 
     @Test
     fun initialStateStartsUpdateOnStart() {
         val state = ImmediateUpdateState.Initial().init()
         state.onStart()
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Checking })
+        verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Checking } })
     }
 
     @Test
@@ -64,7 +64,7 @@ class ImmediateUpdateStateTest: TestAppTest() {
         updateManager.partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Update })
+        verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
     }
 
     @Test
@@ -82,7 +82,7 @@ class ImmediateUpdateStateTest: TestAppTest() {
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         testTask.succeed(updateInfo)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Update })
+        verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
     }
 
     @Test
@@ -203,7 +203,16 @@ class ImmediateUpdateStateTest: TestAppTest() {
         state.onResume()
 
         assertTrue(updateManager.isImmediateFlowVisible)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Done })
+        verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Done } })
+    }
+
+    @Test
+    fun doneStateWillCompleteViewOnResume() {
+        val state = ImmediateUpdateState.Done().init()
+        state.onResume()
+
+        verify(view).updateComplete()
+        verify(stateMachine).setUpdateState(check { assertTrue { NONE == it } })
     }
 
     @Test
@@ -213,7 +222,7 @@ class ImmediateUpdateStateTest: TestAppTest() {
         val state = ImmediateUpdateState.Failed(error).init()
         state.onResume()
 
-        verify(view).fail(error)
-        verify(stateMachine).setUpdateState(check { it is ImmediateUpdateState.Done })
+        verify(view).updateFailed(error)
+        verify(stateMachine).setUpdateState(check { assertTrue { NONE == it } })
     }
 }

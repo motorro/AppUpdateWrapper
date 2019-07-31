@@ -1,9 +1,19 @@
 package com.motorro.appupdatewrapper
 
 import android.app.Activity
+import androidx.lifecycle.Lifecycle.State.RESUMED
 
 /**
  * Application update view that performs user interaction.
+ * [AppUpdateWrapper] works as a presenter for [AppUpdateView] calling methods
+ * appropriate for concrete update flow.
+ * All view methods are called within [RESUMED] state
+ * to make your view stack happy.
+ * The update process may end in calling one of two methods:
+ * * [updateComplete] - update check has completed without **critical** errors (although [nonCriticalUpdateError] may be
+ *   called during the workflow)
+ * * [updateFailed] - a critical error has occurred during the update. Say the immediate update fails and the application
+ *   should be terminated
  */
 interface AppUpdateView {
     /**
@@ -23,17 +33,18 @@ interface AppUpdateView {
     fun updateReady()
 
     /**
-     * No update available - complete
+     * No update available or update flow completed
      */
-    fun complete()
+    fun updateComplete()
 
     /**
-     * Update critical error occurred e.g. when immediate update was requested but failed to proceed
+     * Critical update error occurred e.g. when immediate update was requested but failed to proceed
      */
-    fun fail(e: Throwable)
+    fun updateFailed(e: Throwable)
 
     /**
-     * Notify user of update check error or just [complete]
+     * Notify user of some non-critical update error e.g. flexible update has failed but it is not critical for
+     * general application flow.
      */
-    fun reportError(e: Throwable)
+    fun nonCriticalUpdateError(e: Throwable)
 }

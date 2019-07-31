@@ -2,15 +2,14 @@ package com.motorro.appupdatewrapper
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.State.*
-import androidx.lifecycle.LifecycleOwner
-import com.nhaarman.mockito_kotlin.*
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AppUpdateLifecycleStateMachineTest: TestAppTest() {
     private lateinit var lifecycle: Lifecycle
     private lateinit var stateMachine: AppUpdateLifecycleStateMachine
@@ -21,11 +20,7 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
         lifecycle = mock {
             on { currentState } doReturn DESTROYED
         }
-
-        val lifecycleOwner: LifecycleOwner = mock {
-            on { lifecycle } doReturn lifecycle
-        }
-        stateMachine = AppUpdateLifecycleStateMachine(lifecycleOwner, mock(), mock())
+        stateMachine = AppUpdateLifecycleStateMachine(lifecycle, mock(), mock())
 
         state = spy()
     }
