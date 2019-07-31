@@ -86,12 +86,9 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          * Starts update on success or transfers to failed state
          */
         private fun processUpdateInfo(appUpdateInfo: AppUpdateInfo) {
-            val state = when {
-                false == appUpdateInfo.isUpdateTypeAllowed(IMMEDIATE) -> Failed(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
-                else -> when (appUpdateInfo.updateAvailability()) {
-                    UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> Update(appUpdateInfo)
-                    else -> Failed(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
-                }
+            val state = when (appUpdateInfo.updateAvailability()) {
+                UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> Update(appUpdateInfo)
+                else -> Failed(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
             }
 
             stateMachine.setUpdateState(state)
@@ -108,7 +105,9 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onResume() {
             super.onResume()
-            withUpdateView {
+            if (false == updateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
+                stateMachine.setUpdateState(Failed(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED)))
+            } else withUpdateView {
                 stateMachine.updateManager.startUpdateFlowForResult(
                     updateInfo,
                     IMMEDIATE,

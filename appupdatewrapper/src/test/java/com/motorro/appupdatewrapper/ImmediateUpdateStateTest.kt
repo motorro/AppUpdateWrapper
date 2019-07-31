@@ -107,30 +107,6 @@ class ImmediateUpdateStateTest: TestAppTest() {
     }
 
     @Test
-    fun checkingStateWillSetFailedStateIfUpdateTypeNotSupported() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.UNKNOWN,
-            InstallStatus.UNKNOWN,
-            immediateAvailable = false
-        )
-        val testTask = createTestInfoTask()
-        val testUpdateManager: AppUpdateManager = mock {
-            on { this.appUpdateInfo } doReturn testTask
-        }
-        whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
-
-        val state = ImmediateUpdateState.Checking().init()
-        state.onStart()
-        testTask.succeed(updateInfo)
-        argumentCaptor<AppUpdateState>().apply {
-            verify(stateMachine).setUpdateState(capture())
-            val newState = firstValue as ImmediateUpdateState.Failed
-            val stateError = newState.error
-            assertEquals(AppUpdateException.ERROR_UPDATE_TYPE_NOT_ALLOWED, stateError.message)
-        }
-    }
-
-    @Test
     fun checkingStateWillSetFailedStateIfUpdateNotAvailable() {
         val updateInfo = createUpdateInfo(
             UpdateAvailability.UPDATE_NOT_AVAILABLE,
@@ -204,6 +180,24 @@ class ImmediateUpdateStateTest: TestAppTest() {
 
         assertTrue(updateManager.isImmediateFlowVisible)
         verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Done } })
+    }
+
+    @Test
+    fun updatingStateWillSetFailedStateIfUpdateTypeNotSupported() {
+        val updateInfo = createUpdateInfo(
+            UpdateAvailability.UNKNOWN,
+            InstallStatus.UNKNOWN,
+            immediateAvailable = false
+        )
+
+        val state = ImmediateUpdateState.Update(updateInfo).init()
+        state.onResume()
+        argumentCaptor<AppUpdateState>().apply {
+            verify(stateMachine).setUpdateState(capture())
+            val newState = firstValue as ImmediateUpdateState.Failed
+            val stateError = newState.error
+            assertEquals(AppUpdateException.ERROR_UPDATE_TYPE_NOT_ALLOWED, stateError.message)
+        }
     }
 
     @Test
