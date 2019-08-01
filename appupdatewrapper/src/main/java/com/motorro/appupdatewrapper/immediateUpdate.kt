@@ -1,5 +1,6 @@
 package com.motorro.appupdatewrapper
 
+import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.play.core.appupdate.AppUpdateManager
 
@@ -15,6 +16,7 @@ import com.google.android.play.core.appupdate.AppUpdateManager
  * @param appUpdateManager AppUpdateManager instance
  * @param view Application update UI interaction view
  */
+@MainThread
 fun LifecycleOwner.startImmediateUpdate(appUpdateManager: AppUpdateManager, view: AppUpdateView): AppUpdateWrapper =
     AppUpdateLifecycleStateMachine(lifecycle, appUpdateManager, view).also {
         ImmediateUpdateState.start(it)

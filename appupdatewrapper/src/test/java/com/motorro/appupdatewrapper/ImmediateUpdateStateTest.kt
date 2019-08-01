@@ -1,13 +1,16 @@
 package com.motorro.appupdatewrapper
 
+import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows
+import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -37,28 +40,27 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun checkingStateWillSetUpdateStateIfUpdateFound() {
         updateManager.setUpdateAvailable(100500)
-        updateManager.partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
+        updateManager.partiallyAllowedUpdateType = IMMEDIATE
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun checkingStateWillSetUpdateStateIfAlreadyUpdating() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS,
-            InstallStatus.UNKNOWN
-        )
-        val testTask = createTestInfoTask()
-        val testUpdateManager: AppUpdateManager = mock {
-            on { this.appUpdateInfo } doReturn testTask
-        }
-        whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, IMMEDIATE, activity, 100)
+            assertTrue(isImmediateFlowVisible)
+            userAcceptsUpdate()
 
-        val state = ImmediateUpdateState.Checking().init()
-        state.onStart()
-        testTask.succeed(updateInfo)
-        verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
+            val state = ImmediateUpdateState.Checking().init()
+            state.onStart()
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
+        }
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
     }
 
     @Test
@@ -84,19 +86,10 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     fun checkingStateWillSetFailedStateIfUpdateNotAvailable() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.UPDATE_NOT_AVAILABLE,
-            InstallStatus.UNKNOWN
-        )
-        val testTask = createTestInfoTask()
-        val testUpdateManager: AppUpdateManager = mock {
-            on { this.appUpdateInfo } doReturn testTask
-        }
-        whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
+        updateManager.setUpdateNotAvailable()
 
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
-        testTask.succeed(updateInfo)
         argumentCaptor<AppUpdateState>().apply {
             verify(stateMachine).setUpdateState(capture())
             val newState = firstValue as Failed

@@ -2,11 +2,15 @@ package com.motorro.appupdatewrapper
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper.getMainLooper
 import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.tasks.OnFailureListener
 import com.google.android.play.core.tasks.OnSuccessListener
 import com.google.android.play.core.tasks.Task
 import com.nhaarman.mockitokotlin2.spy
+import org.robolectric.annotation.LooperMode
 
 const val APP_PACKAGE = "com.motorro.appupdatewrapper"
 const val APP_VERSION = 100500
@@ -63,3 +67,16 @@ abstract class TestUpdateInfoTask: Task<AppUpdateInfo>() {
  * Creates a test task
  */
 fun createTestInfoTask(): TestUpdateInfoTask = spy()
+
+/**
+ * Requests update info and executes [block] when returned
+ * Requires `@LooperMode(LooperMode.Mode.PAUSED)`
+ * @see LooperMode
+ */
+inline fun FakeAppUpdateManager.withInfo(crossinline block: FakeAppUpdateManager.(AppUpdateInfo) -> Unit) {
+    appUpdateInfo
+        .addOnSuccessListener {
+            Handler(getMainLooper()).post { block(it) }
+        }
+        .addOnFailureListener { throw IllegalStateException("Unexpected update check error") }
+}
