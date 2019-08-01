@@ -1,6 +1,5 @@
 package com.motorro.appupdatewrapper
 
-import androidx.annotation.VisibleForTesting
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
@@ -32,7 +31,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
-            stateMachine.setUpdateState(Checking())
+            setUpdateState(Checking())
         }
     }
 
@@ -72,26 +71,24 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
         override fun onStop() {
             super.onStop()
             stopped = true
-            stateMachine.setUpdateState(Initial())
+            setUpdateState(Initial())
         }
 
         /**
          * Transfers to failed state
          */
         private fun reportUpdateFailure(appUpdateException: AppUpdateException) {
-            stateMachine.setUpdateState(Failed(appUpdateException))
+            fail(appUpdateException)
         }
 
         /**
          * Starts update on success or transfers to failed state
          */
         private fun processUpdateInfo(appUpdateInfo: AppUpdateInfo) {
-            val state = when (appUpdateInfo.updateAvailability()) {
-                UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> Update(appUpdateInfo)
-                else -> Failed(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
+            when (appUpdateInfo.updateAvailability()) {
+                UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> setUpdateState(Update(appUpdateInfo))
+                else -> fail(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
             }
-
-            stateMachine.setUpdateState(state)
         }
     }
 
@@ -106,7 +103,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
         override fun onResume() {
             super.onResume()
             if (false == updateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
-                stateMachine.setUpdateState(Failed(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED)))
+                fail(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
             } else withUpdateView {
                 stateMachine.updateManager.startUpdateFlowForResult(
                     updateInfo,
@@ -114,39 +111,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
                     activity,
                     REQUEST_CODE_UPDATE
                 )
-                stateMachine.setUpdateState(Done())
-            }
-        }
-    }
-
-    /**
-     * Completes the update sequence
-     */
-    internal class Done: ImmediateUpdateState() {
-        /**
-         * Handles lifecycle `onResume`
-         */
-        override fun onResume() {
-            super.onResume()
-            withUpdateView {
-                updateComplete()
-                stateMachine.setUpdateState(NONE)
-            }
-        }
-    }
-
-    /**
-     * Update failed
-     */
-    internal class Failed(@VisibleForTesting val error: AppUpdateException) : ImmediateUpdateState() {
-        /**
-         * Handles lifecycle `onResume`
-         */
-        override fun onResume() {
-            super.onResume()
-            withUpdateView {
-                updateFailed(error)
-                stateMachine.setUpdateState(NONE)
+                setUpdateState(Done())
             }
         }
     }

@@ -16,6 +16,11 @@ internal interface AppUpdateStateMachine {
     val updateManager: AppUpdateManager
 
     /**
+     * Terminates update flow if user has already cancelled an update
+     */
+    val flowBreaker: UpdateFlowBreaker
+
+    /**
      * Update view
      */
     val view: AppUpdateView
@@ -31,11 +36,13 @@ internal interface AppUpdateStateMachine {
  * @param lifecycle Component lifecycle
  * @param updateManager AppUpdateManager instance
  * @param view Application update view interface
+ * @param flowBreaker Terminates update flow if user has already cancelled an update
  */
 internal class AppUpdateLifecycleStateMachine(
     private val lifecycle: Lifecycle,
     override val updateManager: AppUpdateManager,
-    override val view: AppUpdateView
+    override val view: AppUpdateView,
+    override val flowBreaker: UpdateFlowBreaker = UpdateFlowBreaker.alwaysOn()
 ): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver {
     /**
      * Current update state
@@ -43,7 +50,7 @@ internal class AppUpdateLifecycleStateMachine(
     private var currentUpdateState: AppUpdateState
 
     init {
-        currentUpdateState = NONE
+        currentUpdateState = None()
         lifecycle.addObserver(this)
     }
 

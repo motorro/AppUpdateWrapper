@@ -20,7 +20,7 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
         lifecycle = mock {
             on { currentState } doReturn DESTROYED
         }
-        stateMachine = AppUpdateLifecycleStateMachine(lifecycle, mock(), mock())
+        stateMachine = AppUpdateLifecycleStateMachine(lifecycle, mock(), mock(), mock())
 
         state = spy()
     }

@@ -24,9 +24,9 @@ class AppUpdateException(message: String, cause: Throwable?): RuntimeException(m
         const val ERROR_UPDATE_FAILED = "Update failed"
 
         /**
-         * An update returned unknown update result
+         * An update returned unknown update status
          */
-        const val ERROR_UNKNOWN_UPDATE_RESULT = "Unknown update result"
+        const val ERROR_UNKNOWN_UPDATE_STATUS = "Unknown update status"
 
         /**
          * Immediate update was requested but no update available

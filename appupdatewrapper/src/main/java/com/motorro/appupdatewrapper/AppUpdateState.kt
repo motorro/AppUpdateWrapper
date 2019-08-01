@@ -1,5 +1,7 @@
 package com.motorro.appupdatewrapper
 
+import androidx.annotation.VisibleForTesting
+
 /**
  * Application update state interface
  */
@@ -15,6 +17,55 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
      */
     protected fun withUpdateView(block: AppUpdateView.() -> Unit) {
         stateMachine.view.block()
+    }
+
+    /**
+     * Executes [block] if update flow is not broken by [AppUpdateStateMachine.flowBreaker]
+     * Otherwise transfers to [Done]
+     */
+    protected inline fun ifNotBroken(block: () -> Unit) {
+        if(false != stateMachine.flowBreaker.isEnoughTimePassedSinceLatestCancel()) {
+            block()
+        } else {
+            complete()
+        }
+    }
+
+    /**
+     * Sets new update state
+     */
+    protected fun setUpdateState(state: AppUpdateState) {
+        stateMachine.setUpdateState(state)
+    }
+
+    /**
+     * Sets a dummy state
+     */
+    protected open fun setNone() {
+        setUpdateState(None())
+    }
+
+    /**
+     * Reports update is complete
+     */
+    protected open fun complete() {
+        setUpdateState(Done())
+    }
+
+    /**
+     * Reports non-critical update error.
+     * Update flow continues
+     */
+    protected open fun reportError(error: AppUpdateException) {
+        setUpdateState(Error(error))
+    }
+
+    /**
+     * Reports critical update error.
+     * Update terminates
+     */
+    protected open fun fail(error: AppUpdateException) {
+        setUpdateState(Failed(error))
     }
 
     /**
@@ -61,4 +112,55 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
 /**
  * Default update state that does nothing
  */
-internal object NONE: AppUpdateState()
+internal class None: AppUpdateState()
+
+/**
+ * Completes the update sequence
+ */
+internal class Done: AppUpdateState() {
+    /**
+     * Handles lifecycle `onResume`
+     */
+    override fun onResume() {
+        super.onResume()
+        withUpdateView {
+            updateComplete()
+            setNone()
+        }
+    }
+}
+
+/**
+ * Update failed with non-critical error
+ */
+internal class Error(@VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
+    /**
+     * Handles lifecycle `onResume`
+     */
+    override fun onResume() {
+        super.onResume()
+        ifNotBroken {
+            withUpdateView {
+                updateFailed(error)
+                setNone()
+            }
+        }
+    }
+}
+
+/**
+ * Critical update failure
+ */
+internal class Failed(@VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
+    /**
+     * Handles lifecycle `onResume`
+     */
+    override fun onResume() {
+        super.onResume()
+        withUpdateView {
+            updateFailed(error)
+            setNone()
+        }
+    }
+}
+

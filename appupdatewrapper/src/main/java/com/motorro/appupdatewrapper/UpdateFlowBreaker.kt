@@ -4,8 +4,7 @@ import android.content.SharedPreferences
 import java.util.concurrent.TimeUnit
 
 /**
- * Checks if user has already refused to install update and terminates
- * flexible update flow
+ * Checks if user has already refused to install update and terminates   update flow
  */
 interface UpdateFlowBreaker: TimeCancelledStorage {
     /**
@@ -14,6 +13,11 @@ interface UpdateFlowBreaker: TimeCancelledStorage {
     fun isEnoughTimePassedSinceLatestCancel(): Boolean
 
     companion object {
+        /**
+         * Creates a dummy breaker that never interrupts callback
+         */
+        fun alwaysOn(): UpdateFlowBreaker = AlwaysOn
+
         /**
          * Creates a breaker that checks if given interval has passed since last time user had cancelled update
          * @param interval An interval between user cancels the update and the next time he is prompted
@@ -37,6 +41,15 @@ interface UpdateFlowBreaker: TimeCancelledStorage {
         fun forOneDay(storage: SharedPreferences): UpdateFlowBreaker =
             withInterval(1L, TimeUnit.DAYS, TimeCancelledStorage.withPreferences(storage))
     }
+}
+
+/**
+ * Always-on flow breaker
+ */
+internal object AlwaysOn: UpdateFlowBreaker {
+    override fun isEnoughTimePassedSinceLatestCancel(): Boolean = true
+    override fun getTimeCanceled(): Long = 0
+    override fun saveTimeCanceled() = Unit
 }
 
 /**
