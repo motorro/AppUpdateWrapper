@@ -54,7 +54,7 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
 
     /**
      * Reports non-critical update error.
-     * Update flow continues
+     * Ends-up in [AppUpdateView.updateComplete] calling [AppUpdateView.nonCriticalUpdateError]
      */
     protected open fun reportError(error: AppUpdateException) {
         setUpdateState(Error(error))
@@ -62,7 +62,7 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
 
     /**
      * Reports critical update error.
-     * Update terminates
+     * Ends-up in [AppUpdateView.updateFailed]
      */
     protected open fun fail(error: AppUpdateException) {
         setUpdateState(Failed(error))
@@ -131,7 +131,8 @@ internal class Done: AppUpdateState() {
 }
 
 /**
- * Update failed with non-critical error
+ * Reports non-critical update error.
+ * Ends-up in [AppUpdateView.updateComplete] calling [AppUpdateView.nonCriticalUpdateError]
  */
 internal class Error(@VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
     /**
@@ -141,15 +142,16 @@ internal class Error(@VisibleForTesting val error: AppUpdateException) : AppUpda
         super.onResume()
         ifNotBroken {
             withUpdateView {
-                updateFailed(error)
-                setNone()
+                nonCriticalUpdateError(error)
+                complete()
             }
         }
     }
 }
 
 /**
- * Critical update failure
+ * Reports critical update error.
+ * Ends-up in [AppUpdateView.updateFailed]
  */
 internal class Failed(@VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
     /**

@@ -1,10 +1,7 @@
 package com.motorro.appupdatewrapper
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.nhaarman.mockitokotlin2.check
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertFalse
@@ -46,7 +43,7 @@ internal class AppUpdateStateTest: BaseAppUpdateStateTest() {
         state.onResume()
 
         verify(view).updateComplete()
-        verify(stateMachine).setUpdateState(check { assertTrue { it is None } })
+        verify(stateMachine).setUpdateState(any<None>())
     }
 
     @Test
@@ -56,8 +53,8 @@ internal class AppUpdateStateTest: BaseAppUpdateStateTest() {
         val state = Error(error).init()
         state.onResume()
 
-        verify(view).updateFailed(error)
-        verify(stateMachine).setUpdateState(check { assertTrue { it is None } })
+        verify(view).nonCriticalUpdateError(error)
+        verify(stateMachine).setUpdateState(any<Done>())
     }    
 
     @Test
@@ -69,7 +66,7 @@ internal class AppUpdateStateTest: BaseAppUpdateStateTest() {
         state.onResume()
 
         verify(view, never()).updateFailed(error)
-        verify(stateMachine).setUpdateState(check { assertTrue { it is Done } })
+        verify(stateMachine).setUpdateState(any<Done>())
     }
 
     @Test
@@ -80,6 +77,6 @@ internal class AppUpdateStateTest: BaseAppUpdateStateTest() {
         state.onResume()
 
         verify(view).updateFailed(error)
-        verify(stateMachine).setUpdateState(check { assertTrue { it is None } })
+        verify(stateMachine).setUpdateState(any<None>())
     }    
 }
