@@ -58,6 +58,8 @@ internal class AppUpdateLifecycleStateMachine(
      * Sets new update state
      */
     override fun setUpdateState(newState: AppUpdateState) {
+        currentUpdateState.cleanup()
+
         newState.stateMachine = this
         currentUpdateState = newState
 

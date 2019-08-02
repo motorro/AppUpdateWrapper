@@ -107,6 +107,11 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
      * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
      */
     override fun userConfirmedUpdate() = Unit
+
+    /**
+     * Called by state-machine when state is being replaced
+     */
+    open fun cleanup() = Unit
 }
 
 /**

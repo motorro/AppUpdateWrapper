@@ -35,6 +35,13 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
     }
 
     @Test
+    fun cleansUpCurrentStateOnUpdate() {
+        stateMachine.setUpdateState(state)
+        stateMachine.setUpdateState(None())
+        verify(state).cleanup()
+    }
+
+    @Test
     fun doesNotCallSetStateLifecycleMethodsIfNotStartedAtLeast() {
         stateMachine.setUpdateState(state)
         verify(state, never()).onStart()
