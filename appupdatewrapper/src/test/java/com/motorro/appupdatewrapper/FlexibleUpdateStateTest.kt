@@ -42,6 +42,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     fun checkingStateWillCheckUpdateOnStart() {
         val state = FlexibleUpdateState.Checking().init()
         state.onStart()
+        verify(view).updateChecking()
         verify(updateManager).appUpdateInfo
     }
 

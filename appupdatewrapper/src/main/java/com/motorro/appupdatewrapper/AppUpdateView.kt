@@ -25,6 +25,16 @@ interface AppUpdateView {
     val activity: Activity
 
     /**
+     * Called when update is checking or downloading data
+     * Subclasses may display some spinner at this point.
+     * Remove spinner in:
+     * - [updateReady]
+     * - [updateComplete]
+     * - [updateFailed]
+     */
+    fun updateChecking() = Unit
+
+    /**
      * Reports update is downloaded and ready to be installed
      * When ready to proceed call [AppUpdateState.userConfirmedUpdate]
      * @see AppUpdateState.userConfirmedUpdate
@@ -33,9 +43,16 @@ interface AppUpdateView {
     fun updateReady()
 
     /**
+     * Called when installation activity launches
+     * Calling this handler means the application will be restarted if update succeeds
+     * Subclass may want to finish it's current activity at this point
+     */
+    fun updateInstallUiVisible() = Unit
+
+    /**
      * No update available or update flow completed
      */
-    fun updateComplete()
+    fun updateComplete() = Unit
 
     /**
      * Critical update error occurred e.g. when immediate update was requested but failed to proceed
@@ -46,5 +63,5 @@ interface AppUpdateView {
      * Notify user of some non-critical update error e.g. flexible update has failed but it is not critical for
      * general application flow.
      */
-    fun nonCriticalUpdateError(e: Throwable)
+    fun nonCriticalUpdateError(e: Throwable) = Unit
 }

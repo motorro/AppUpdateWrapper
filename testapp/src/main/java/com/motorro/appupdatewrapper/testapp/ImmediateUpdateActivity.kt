@@ -24,5 +24,4 @@ class ImmediateUpdateActivity : AppCompatActivity(), AppUpdateView {
         setResult(RESULT_FAILURE)
         finish()
     }
-    override fun nonCriticalUpdateError(e: Throwable) = Unit
 }

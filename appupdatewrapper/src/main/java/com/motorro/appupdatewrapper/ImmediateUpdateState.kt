@@ -61,6 +61,9 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
         override fun onStart() {
             super.onStart()
             stopped = false
+            withUpdateView {
+                updateChecking()
+            }
             stateMachine.updateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
@@ -121,6 +124,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
                     activity,
                     REQUEST_CODE_UPDATE
                 )
+                updateInstallUiVisible()
                 setUpdateState(Done())
             }
         }

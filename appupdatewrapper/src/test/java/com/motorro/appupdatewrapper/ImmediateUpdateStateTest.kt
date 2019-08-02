@@ -34,6 +34,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
     fun checkingStateWillCheckUpdateOnStart() {
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
+        verify(view).updateChecking()
         verify(updateManager).appUpdateInfo
     }
 
@@ -148,6 +149,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
         state.onResume()
 
         assertTrue(updateManager.isImmediateFlowVisible)
+        verify(view).updateInstallUiVisible()
         verify(stateMachine).setUpdateState(check { assertTrue { it is Done } })
     }
 

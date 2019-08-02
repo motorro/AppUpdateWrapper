@@ -52,6 +52,9 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         override fun onStart() {
             super.onStart()
             stopped = false
+            withUpdateView {
+                updateChecking()
+            }
             stateMachine.updateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
@@ -131,7 +134,15 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     }
 
     internal class InstallConsent(private val updateInfo: AppUpdateInfo): FlexibleUpdateState() {
-
+        /**
+         * Handles lifecycle `onResume`
+         */
+        override fun onResume() {
+            super.onResume()
+            withUpdateView {
+                updateInstallUiVisible()
+            }
+        }
     }
 
     internal class CompleteUpdate(): FlexibleUpdateState() {
