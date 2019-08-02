@@ -11,6 +11,19 @@ import com.google.android.play.core.appupdate.AppUpdateManager
  * flow call [checkActivityResult] function of update wrapper in your hosting activity.
  */
 interface AppUpdateWrapper {
+    companion object {
+        /**
+         * Originally, updating a list of subscribers within event dispatching crashes AppUpdateManager dispatcher
+         * with concurrent update exception.
+         * If your application may use several listeners simultaneously (like you have multiple activity setup) - keep
+         * that value `true`
+         * TODO: Remove the duct tape as soon as original library becomes friendly to multiple subscribers
+         * @see AppUpdateManager.registerListener
+         * @see AppUpdateManager.unregisterListener
+         */
+        var USE_SAFE_LISTENERS = true
+    }
+
     /**
      * Checks activity result and returns `true` if result is an update result and was handled
      * Use to check update activity result in [android.app.Activity.onActivityResult]
