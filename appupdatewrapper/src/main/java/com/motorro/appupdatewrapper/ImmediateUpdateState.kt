@@ -81,7 +81,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
         override fun onStop() {
             super.onStop()
             stopped = true
-            setUpdateState(Initial())
+            complete()
         }
 
         /**

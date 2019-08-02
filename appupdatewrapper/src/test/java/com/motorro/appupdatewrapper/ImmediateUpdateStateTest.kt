@@ -114,7 +114,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
         state.onStart()
         state.onStop()
         testTask.succeed(updateInfo)
-        verify(stateMachine).setUpdateState(any<ImmediateUpdateState.Initial>())
+        verify(stateMachine).setUpdateState(any<Done>())
         verify(stateMachine, never()).setUpdateState(any<ImmediateUpdateState.Update>())
         verify(stateMachine, never()).setUpdateState(any<Failed>())
     }
@@ -132,7 +132,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
         state.onStart()
         state.onStop()
         testTask.fail(error)
-        verify(stateMachine).setUpdateState(any<ImmediateUpdateState.Initial>())
+        verify(stateMachine).setUpdateState(any<Done>())
         verify(stateMachine, never()).setUpdateState(any<ImmediateUpdateState.Update>())
         verify(stateMachine, never()).setUpdateState(any<Failed>())
     }

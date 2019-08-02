@@ -135,7 +135,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
         state.onStart()
         state.onStop()
         testTask.succeed(updateInfo)
-        verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Initial>())
+        verify(stateMachine).setUpdateState(any<Done>())
         verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.UpdateConsent>())
     }
 
@@ -173,7 +173,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
         state.onStart()
         state.onStop()
         testTask.fail(error)
-        verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Initial>())
+        verify(stateMachine).setUpdateState(any<Done>())
         verify(stateMachine, never()).setUpdateState(any<Error>())
     }
 }

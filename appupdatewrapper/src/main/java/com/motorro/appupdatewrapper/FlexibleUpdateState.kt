@@ -72,7 +72,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         override fun onStop() {
             super.onStop()
             stopped = true
-            setUpdateState(Initial())
+            complete()
         }
 
         /**
