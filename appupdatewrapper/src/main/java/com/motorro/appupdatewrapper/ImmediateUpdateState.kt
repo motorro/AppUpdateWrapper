@@ -78,7 +78,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
             withUpdateView {
                 updateChecking()
             }
-            stateMachine.updateManager
+            updateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
                     if (!stopped) {
@@ -132,7 +132,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
             if (false == updateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
                 fail(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
             } else withUpdateView {
-                stateMachine.updateManager.startUpdateFlowForResult(
+                updateManager.startUpdateFlowForResult(
                     updateInfo,
                     IMMEDIATE,
                     activity,

@@ -1,10 +1,14 @@
 package com.motorro.appupdatewrapper
 
 import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
+import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED
+import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL_UNAVAILABLE
 import com.google.android.play.core.install.model.InstallStatus.*
 import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
 
 /**
@@ -65,9 +69,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
-            ifNotBroken {
-                checking()
-            }
+            checking()
         }
     }
 
@@ -87,21 +89,23 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         override fun onStart() {
             super.onStart()
             stopped = false
-            withUpdateView {
-                updateChecking()
+            ifNotBroken {
+                withUpdateView {
+                    updateChecking()
+                }
+                updateManager
+                    .appUpdateInfo
+                    .addOnSuccessListener {
+                        if (!stopped) {
+                            processUpdateInfo(it)
+                        }
+                    }
+                    .addOnFailureListener {
+                        if (!stopped) {
+                            reportUpdateCheckFailure(it)
+                        }
+                    }
             }
-            stateMachine.updateManager
-                .appUpdateInfo
-                .addOnSuccessListener {
-                    if (!stopped) {
-                        processUpdateInfo(it)
-                    }
-                }
-                .addOnFailureListener {
-                    if (!stopped) {
-                        reportUpdateCheckFailure(it)
-                    }
-                }
         }
 
         /**
@@ -141,13 +145,6 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     }
 
     /**
-     * Watches for update download status
-     */
-    internal class Downloading(): FlexibleUpdateState() {
-
-    }
-
-    /**
      * Opens update consent
      * @param updateInfo Update info to start flexible update
      */
@@ -168,6 +165,56 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
                 )
                 complete()
             }
+        }
+    }
+
+
+    /**
+     * Watches for update download status
+     */
+    internal class Downloading(): FlexibleUpdateState() {
+        /**
+         * Update state listener
+         */
+        private val listener = InstallStateUpdatedListener { state ->
+            when(state.installStatus()) {
+                CANCELED, INSTALLED -> complete()
+                DOWNLOADED -> installConsent()
+                INSTALLING -> completeUpdate()
+                FAILED -> reportError(
+                    AppUpdateException(
+                        when(state.installErrorCode()) {
+                            ERROR_INSTALL_UNAVAILABLE, ERROR_INSTALL_NOT_ALLOWED -> ERROR_UPDATE_TYPE_NOT_ALLOWED
+                            else -> ERROR_UPDATE_FAILED
+                        }
+                    )
+                )
+            }
+        }
+
+        /**
+         * Handles lifecycle `onResume`
+         */
+        override fun onResume() {
+            super.onResume()
+            updateManager.registerListenerSafe(listener)
+        }
+
+        /**
+         * Handles lifecycle `onPause`
+         */
+        override fun onPause() {
+            super.onPause()
+            // Switch back to checking so only the topmost activity handle installation progress.
+            checking()
+        }
+
+        /**
+         * Called by state-machine when state is being replaced
+         */
+        override fun cleanup() {
+            super.cleanup()
+            updateManager.unregisterListenerSafe(listener)
         }
     }
 

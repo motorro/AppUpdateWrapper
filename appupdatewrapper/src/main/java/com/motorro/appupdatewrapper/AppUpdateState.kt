@@ -1,6 +1,7 @@
 package com.motorro.appupdatewrapper
 
 import androidx.annotation.VisibleForTesting
+import com.google.android.play.core.appupdate.AppUpdateManager
 
 /**
  * Application update state interface
@@ -11,6 +12,12 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
      * @see AppUpdateStateMachine.setUpdateState
      */
     internal lateinit var stateMachine: AppUpdateStateMachine
+
+    /**
+     * Update manager
+     */
+    protected val updateManager: AppUpdateManager
+        get() = stateMachine.updateManager
 
     /**
      * Executes [block] with update view

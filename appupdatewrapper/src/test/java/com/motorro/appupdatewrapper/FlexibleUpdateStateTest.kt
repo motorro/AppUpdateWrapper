@@ -30,20 +30,21 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
-    fun initialStateWontRunIfBroken() {
-        whenever(breaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
-        val state = FlexibleUpdateState.Initial().init()
-        state.onStart()
-        verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.Checking>())
-        verify(stateMachine).setUpdateState(any<Done>())
-    }
-
-    @Test
     fun checkingStateWillCheckUpdateOnStart() {
         val state = FlexibleUpdateState.Checking().init()
         state.onStart()
         verify(view).updateChecking()
         verify(updateManager).appUpdateInfo
+    }
+
+    @Test
+    fun checkingStateWontRunIfBroken() {
+        whenever(breaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
+        val state = FlexibleUpdateState.Checking().init()
+        state.onStart()
+        verify(view, never()).updateChecking()
+        verify(updateManager, never()).appUpdateInfo
+        verify(stateMachine).setUpdateState(any<Done>())
     }
 
     @Test
@@ -66,7 +67,6 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
             val state1 = FlexibleUpdateState.Checking().init()
             state1.onStart()
-            shadowOf(getMainLooper()).idle()
             shadowOf(getMainLooper()).idle()
             verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Downloading>())
 
@@ -93,7 +93,6 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
             val state = FlexibleUpdateState.Checking().init()
             state.onStart()
             shadowOf(getMainLooper()).idle()
-            shadowOf(getMainLooper()).idle()
             verify(stateMachine).setUpdateState(any<FlexibleUpdateState.InstallConsent>())
         }
         shadowOf(getMainLooper()).idle()
@@ -113,7 +112,6 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
             val state = FlexibleUpdateState.Checking().init()
             state.onStart()
-            shadowOf(getMainLooper()).idle()
             shadowOf(getMainLooper()).idle()
             verify(stateMachine).setUpdateState(any<FlexibleUpdateState.CompleteUpdate>())
         }
@@ -176,5 +174,111 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
         testTask.fail(error)
         verify(stateMachine).setUpdateState(any<Done>())
         verify(stateMachine, never()).setUpdateState(any<Error>())
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillSubscribeEventsOnResume() {
+        val state = FlexibleUpdateState.Downloading().init()
+        state.onResume()
+        shadowOf(getMainLooper()).idle()
+        verify(updateManager).registerListener(any())
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillRemoveListenerOnClear() {
+        val state = FlexibleUpdateState.Downloading().init()
+        state.cleanup()
+        shadowOf(getMainLooper()).idle()
+        verify(updateManager).unregisterListener(any())
+    }
+
+    @Test
+    fun downloadingStateWillSwitchToCheckingOnPause() {
+        val state = FlexibleUpdateState.Downloading().init()
+        state.onPause()
+        verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Checking>())
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillSetCompleteUpdateWhenCancelled() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
+            assertTrue(isConfirmationDialogVisible)
+            userAcceptsUpdate()
+            downloadStarts()
+
+            val state = FlexibleUpdateState.Downloading().init()
+            state.onResume()
+            shadowOf(getMainLooper()).idle()
+
+            userCancelsDownload()
+            verify(stateMachine).setUpdateState(any<Done>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillSetInstallConsentWhenDownloaded() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
+            assertTrue(isConfirmationDialogVisible)
+            userAcceptsUpdate()
+            downloadStarts()
+
+            val state = FlexibleUpdateState.Downloading().init()
+            state.onResume()
+            shadowOf(getMainLooper()).idle()
+
+            downloadCompletes()
+            verify(stateMachine).setUpdateState(any<FlexibleUpdateState.InstallConsent>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillSetCompleteUpdateWhenInstalling() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
+            assertTrue(isConfirmationDialogVisible)
+            userAcceptsUpdate()
+            downloadStarts()
+
+            val state = FlexibleUpdateState.Downloading().init()
+            state.onResume()
+            shadowOf(getMainLooper()).idle()
+
+            downloadCompletes()
+            completeUpdate()
+            verify(stateMachine).setUpdateState(any<FlexibleUpdateState.CompleteUpdate>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillReportErrorOnError() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
+            assertTrue(isConfirmationDialogVisible)
+            userAcceptsUpdate()
+            downloadStarts()
+
+            val state = FlexibleUpdateState.Downloading().init()
+            state.onResume()
+            shadowOf(getMainLooper()).idle()
+
+            downloadFails()
+            verify(stateMachine).setUpdateState(any<Error>())
+        }
+        shadowOf(getMainLooper()).idle()
     }
 }
