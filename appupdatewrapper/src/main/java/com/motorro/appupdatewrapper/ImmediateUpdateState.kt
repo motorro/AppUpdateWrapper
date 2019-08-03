@@ -33,6 +33,20 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
     }
 
     /**
+     * Transfers to checking state
+     */
+    protected fun checking() {
+        stateMachine.setUpdateState(Checking())
+    }
+
+    /**
+     * Transfers to update state
+     */
+    protected fun update(appUpdateInfo: AppUpdateInfo) {
+        stateMachine.setUpdateState(Update(appUpdateInfo))
+    }
+
+    /**
      * Initial state
      */
     internal class Initial : ImmediateUpdateState() {
@@ -99,7 +113,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         private fun processUpdateInfo(appUpdateInfo: AppUpdateInfo) {
             when (appUpdateInfo.updateAvailability()) {
-                UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> setUpdateState(Update(appUpdateInfo))
+                UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> update(appUpdateInfo)
                 else -> fail(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
             }
         }
@@ -125,7 +139,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
                     REQUEST_CODE_UPDATE
                 )
                 updateInstallUiVisible()
-                setUpdateState(Done())
+                complete()
             }
         }
     }

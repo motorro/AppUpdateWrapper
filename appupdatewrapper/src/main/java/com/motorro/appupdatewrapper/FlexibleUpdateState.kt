@@ -22,6 +22,41 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     }
 
     /**
+     * Transfers to update-checking state
+     */
+    protected fun checking() {
+        stateMachine.setUpdateState(Checking())
+    }
+
+    /**
+     * Transfers to update-consent state
+     */
+    protected fun updateConsent(appUpdateInfo: AppUpdateInfo) {
+        stateMachine.setUpdateState(UpdateConsent(appUpdateInfo))
+    }
+    
+    /**
+     * Transfers to downloading state
+     */
+    protected fun downloading() {
+        stateMachine.setUpdateState(Downloading())
+    }
+
+    /**
+     * Transfers to install-consent state
+     */
+    protected fun installConsent() {
+        stateMachine.setUpdateState(InstallConsent())
+    }
+
+    /**
+     * Transfers to complete-update state
+     */
+    protected fun completeUpdate() {
+        stateMachine.setUpdateState(CompleteUpdate())
+    }
+
+    /**
      * Initial state
      */
     internal class Initial() : FlexibleUpdateState() {
@@ -31,7 +66,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         override fun onStart() {
             super.onStart()
             ifNotBroken {
-                setUpdateState(Checking())
+                checking()
             }
         }
     }
@@ -92,20 +127,23 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
             with(appUpdateInfo) {
                 when (updateAvailability()) {
                     DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> when (installStatus()) {
-                        REQUIRES_UI_INTENT -> setUpdateState(UpdateConsent(appUpdateInfo))
-                        PENDING, DOWNLOADING -> setUpdateState(Downloading(appUpdateInfo))
-                        DOWNLOADED -> setUpdateState(InstallConsent(appUpdateInfo))
-                        INSTALLING -> setUpdateState(CompleteUpdate())
+                        REQUIRES_UI_INTENT -> updateConsent(appUpdateInfo)
+                        PENDING, DOWNLOADING -> downloading()
+                        DOWNLOADED -> installConsent()
+                        INSTALLING -> completeUpdate()
                         else -> complete()
                     }
-                    UPDATE_AVAILABLE -> setUpdateState(UpdateConsent(appUpdateInfo))
+                    UPDATE_AVAILABLE -> updateConsent(appUpdateInfo)
                     else -> complete()
                 }
             }
         }
     }
 
-    internal class Downloading(private val updateInfo: AppUpdateInfo): FlexibleUpdateState() {
+    /**
+     * Watches for update download status
+     */
+    internal class Downloading(): FlexibleUpdateState() {
 
     }
 
@@ -133,7 +171,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         }
     }
 
-    internal class InstallConsent(private val updateInfo: AppUpdateInfo): FlexibleUpdateState() {
+    internal class InstallConsent(): FlexibleUpdateState() {
         /**
          * Handles lifecycle `onResume`
          */
