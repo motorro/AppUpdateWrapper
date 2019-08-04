@@ -1,5 +1,6 @@
 package com.motorro.appupdatewrapper
 
+import android.app.Activity
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
@@ -8,6 +9,7 @@ import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL
 import com.google.android.play.core.install.model.InstallStatus.*
 import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UNKNOWN_UPDATE_RESULT
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
 
@@ -66,6 +68,14 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     protected fun completeUpdate() {
         stateMachine.setUpdateState(CompleteUpdate())
     }
+
+    /**
+     * Saves time user has explicitly cancelled update
+     */
+    protected fun markUserCancelTime() {
+        stateMachine.flowBreaker.saveTimeCanceled()
+    }
+
 
     /**
      * Initial state
@@ -184,7 +194,26 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
      * Checks for consent activity result
      */
     internal class UpdateConsentCheck: FlexibleUpdateState() {
-
+        /**
+         * Checks activity result and returns `true` if result is an update result and was handled
+         * Use to check update activity result in [android.app.Activity.onActivityResult]
+         */
+        override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
+            if (REQUEST_CODE_UPDATE != requestCode) {
+                return false
+            }
+            when(resultCode) {
+                Activity.RESULT_OK -> {
+                    downloading()
+                }
+                Activity.RESULT_CANCELED -> {
+                    markUserCancelTime()
+                    complete()
+                }
+                else -> reportError(AppUpdateException(ERROR_UNKNOWN_UPDATE_RESULT))
+            }
+            return true
+        }
     }
 
 

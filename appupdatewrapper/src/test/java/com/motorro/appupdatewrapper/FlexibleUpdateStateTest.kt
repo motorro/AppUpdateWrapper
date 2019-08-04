@@ -1,5 +1,6 @@
 package com.motorro.appupdatewrapper
 
+import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -327,5 +328,40 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
             })
         }
         shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    fun updateConsentCheckStateWillSetDownloadingIfConfirmed() {
+        val state = FlexibleUpdateState.UpdateConsentCheck().init()
+        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_OK))
+        verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Downloading>())
+    }
+
+    @Test
+    fun updateConsentCheckStateWillMarkCancellationTimeAndCompleteIfCancelled() {
+        val state = FlexibleUpdateState.UpdateConsentCheck().init()
+        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_CANCELED))
+        verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.Downloading>())
+        verify(stateMachine, never()).setUpdateState(any<Error>())
+        verify(stateMachine.flowBreaker).saveTimeCanceled()
+        verify(stateMachine).setUpdateState(any<Done>())
+    }
+
+    @Test
+    fun updateConsentCheckStateWillNotHandleOtherRequests() {
+        val state = FlexibleUpdateState.UpdateConsentCheck().init()
+        assertFalse(state.checkActivityResult(10, Activity.RESULT_OK))
+        verify(stateMachine, never()).setUpdateState(any())
+    }
+
+    @Test
+    fun updateConsentCheckStateWillReportErrorOnUnknownResult() {
+        val state = FlexibleUpdateState.UpdateConsentCheck().init()
+        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_FIRST_USER))
+        verify(stateMachine, never()).setUpdateState(any<Done>())
+        verify(stateMachine).setUpdateState(check {
+            it as Error
+            assertEquals(AppUpdateException.ERROR_UNKNOWN_UPDATE_RESULT, it.error.message)
+        })
     }
 }
