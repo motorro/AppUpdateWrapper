@@ -38,6 +38,13 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     protected fun updateConsent(appUpdateInfo: AppUpdateInfo) {
         stateMachine.setUpdateState(UpdateConsent(appUpdateInfo))
     }
+
+    /**
+     * Transfers to update consent check
+     */
+    protected fun updateConsentCheck() {
+        stateMachine.setUpdateState(UpdateConsentCheck())
+    }
     
     /**
      * Transfers to downloading state
@@ -145,7 +152,8 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     }
 
     /**
-     * Opens update consent
+     * Opens update consent.
+     * View should handle pass activity result to [checkActivityResult]
      * @param updateInfo Update info to start flexible update
      */
     internal class UpdateConsent(private val updateInfo: AppUpdateInfo): FlexibleUpdateState() {
@@ -154,18 +162,29 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun onResume() {
             super.onResume()
-            if (false == updateInfo.isUpdateTypeAllowed(FLEXIBLE)) {
-                reportError(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
-            } else withUpdateView {
-                stateMachine.updateManager.startUpdateFlowForResult(
-                    updateInfo,
-                    FLEXIBLE,
-                    activity,
-                    REQUEST_CODE_UPDATE
-                )
-                complete()
+            ifNotBroken {
+                if (false == updateInfo.isUpdateTypeAllowed(FLEXIBLE)) {
+                    reportError(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
+                } else withUpdateView {
+                    stateMachine.updateManager.startUpdateFlowForResult(
+                        updateInfo,
+                        FLEXIBLE,
+                        activity,
+                        REQUEST_CODE_UPDATE
+                    )
+                    // As consent activity starts application looses focus.
+                    // So we need to transfer to the next state to break popup cycle.
+                    updateConsentCheck()
+                }
             }
         }
+    }
+
+    /**
+     * Checks for consent activity result
+     */
+    internal class UpdateConsentCheck: FlexibleUpdateState() {
+
     }
 
 
@@ -218,6 +237,9 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         }
     }
 
+    /**
+     * Instructs view to display update consent
+     */
     internal class InstallConsent(): FlexibleUpdateState() {
         /**
          * Handles lifecycle `onResume`

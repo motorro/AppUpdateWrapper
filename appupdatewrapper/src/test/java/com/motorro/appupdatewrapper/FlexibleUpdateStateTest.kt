@@ -3,6 +3,7 @@ package com.motorro.appupdatewrapper
 import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -12,6 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -278,6 +280,51 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
             downloadFails()
             verify(stateMachine).setUpdateState(any<Error>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun updateConsentStateWillAskForInstallConsentOnResume() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            val state = FlexibleUpdateState.UpdateConsent(it).init()
+            state.onResume()
+            assertTrue(isConfirmationDialogVisible)
+            verify(stateMachine).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun updateConsentStateWillNotAskForInstallConsentIfBroken() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            whenever(breaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
+            val state = FlexibleUpdateState.UpdateConsent(it).init()
+            state.onResume()
+            assertFalse(isConfirmationDialogVisible)
+            verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun updateConsentStateWillReportErrorIfUpdateIsNotCompatible() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
+        updateManager.withInfo {
+            val state = FlexibleUpdateState.UpdateConsent(it).init()
+            state.onResume()
+            assertFalse(isConfirmationDialogVisible)
+            verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
+            verify(stateMachine).setUpdateState(check { newState -> 
+                val error = (newState as Error).error
+                assertEquals(AppUpdateException.ERROR_UPDATE_TYPE_NOT_ALLOWED, error.message)
+            })
         }
         shadowOf(getMainLooper()).idle()
     }
