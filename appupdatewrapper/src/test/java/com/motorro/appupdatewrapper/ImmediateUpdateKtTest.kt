@@ -25,7 +25,6 @@ class ImmediateUpdateKtTest: TestAppTest() {
         }
 
         assertTrue(updateManager.isImmediateFlowVisible)
-        assertEquals(ImmediateUpdateActivity.RESULT_SUCCESS, scenario.result.resultCode)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.motorro.appupdatewrapper
 
+import android.app.Activity
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
@@ -47,6 +48,13 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
     }
 
     /**
+     * Transfers to update ui check
+     */
+    protected fun updateUiCheck() {
+        stateMachine.setUpdateState(UpdateUiCheck())
+    }
+
+    /**
      * Initial state
      */
     internal class Initial : ImmediateUpdateState() {
@@ -55,7 +63,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
-            setUpdateState(Checking())
+            checking()
         }
     }
 
@@ -139,8 +147,31 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
                     REQUEST_CODE_UPDATE
                 )
                 updateInstallUiVisible()
-                complete()
+                updateUiCheck()
             }
+        }
+    }
+
+    /**
+     * Checks for update ui errors
+     */
+    internal class UpdateUiCheck: ImmediateUpdateState() {
+        /**
+         * Checks activity result and returns `true` if result is an update result and was handled
+         * Use to check update activity result in [android.app.Activity.onActivityResult]
+         */
+        override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
+            if (REQUEST_CODE_UPDATE != requestCode) {
+                return false
+            }
+
+            if (Activity.RESULT_OK == resultCode) {
+                complete()
+            } else {
+                fail(AppUpdateException(ERROR_UPDATE_FAILED))
+            }
+
+            return true
         }
     }
 }
