@@ -105,7 +105,6 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
-            stopped = false
             ifNotBroken {
                 withUpdateView {
                     updateChecking()
@@ -216,7 +215,6 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         }
     }
 
-
     /**
      * Watches for update download status
      */
@@ -275,13 +273,53 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun onResume() {
             super.onResume()
-            withUpdateView {
-                updateInstallUiVisible()
+            ifNotBroken {
+                withUpdateView {
+                    updateInstallUiVisible()
+                }
             }
         }
     }
 
+    /**
+     * Completes flexible update
+     */
     internal class CompleteUpdate(): FlexibleUpdateState() {
+        /*
+         * Set to true on [onStop] to prevent view interaction
+         * as there is no way to abort task
+         */
+        private var stopped: Boolean = false
 
+        /**
+         * Handles lifecycle `onStart`
+         */
+        override fun onStart() {
+            super.onStart()
+            updateManager
+                .completeUpdate()
+                .addOnSuccessListener {
+                    if (!stopped) {
+                        complete()
+                    }
+                }
+                .addOnFailureListener {
+                    if (!stopped) {
+                        reportError(AppUpdateException(ERROR_UPDATE_FAILED, it))
+                    }
+                }
+            withUpdateView {
+                updateInstallUiVisible()
+            }
+        }
+
+        /**
+         * Handles lifecycle `onStop`
+         */
+        override fun onStop() {
+            super.onStop()
+            stopped = true
+            complete()
+        }
     }
 }

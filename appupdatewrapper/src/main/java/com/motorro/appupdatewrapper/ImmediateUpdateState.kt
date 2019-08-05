@@ -82,7 +82,6 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
-            stopped = false
             withUpdateView {
                 updateChecking()
             }

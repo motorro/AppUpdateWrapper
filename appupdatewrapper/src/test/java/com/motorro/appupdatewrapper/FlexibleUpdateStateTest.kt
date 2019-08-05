@@ -364,4 +364,69 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
             assertEquals(AppUpdateException.ERROR_UNKNOWN_UPDATE_RESULT, it.error.message)
         })
     }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun completeUpdateStateWillCompleteUpdateOnStart() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
+            userAcceptsUpdate()
+            downloadStarts()
+            downloadCompletes()
+
+            val state = FlexibleUpdateState.CompleteUpdate().init()
+            state.onStart()
+            shadowOf(getMainLooper()).idle()
+            verify(updateManager).completeUpdate()
+            verify(stateMachine).setUpdateState(any<Done>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun completeUpdateStateWillReportErrorIfUpdateFails() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            val state = FlexibleUpdateState.CompleteUpdate().init()
+            state.onStart()
+            shadowOf(getMainLooper()).idle()
+            verify(updateManager).completeUpdate()
+            verify(stateMachine).setUpdateState(any<Error>())
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    fun completeUpdateStateWillCompleteIfStoppedBeforeTaskCompletes() {
+        val testTask = createTestInstallTask()
+        val testUpdateManager: AppUpdateManager = mock {
+            on { this.completeUpdate() } doReturn testTask
+        }
+        whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
+
+        val state = FlexibleUpdateState.CompleteUpdate().init()
+        state.onStart()
+        state.onStop()
+        testTask.succeed(null)
+        verify(stateMachine).setUpdateState(any<Done>())
+    }
+
+    @Test
+    fun completeUpdateStateWillNotProceedIfStoppedBeforeTaskFails() {
+        val error = RuntimeException("Update failed")
+        val testTask = createTestInstallTask()
+        val testUpdateManager: AppUpdateManager = mock {
+            on { this.completeUpdate() } doReturn testTask
+        }
+        whenever(stateMachine.updateManager).thenReturn(testUpdateManager)
+
+        val state = FlexibleUpdateState.CompleteUpdate().init()
+        state.onStart()
+        state.onStop()
+        testTask.fail(error)
+        verify(stateMachine).setUpdateState(any<Done>())
+        verify(stateMachine, never()).setUpdateState(any<Error>())
+    }
 }

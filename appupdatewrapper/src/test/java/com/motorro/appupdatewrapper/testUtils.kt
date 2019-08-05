@@ -34,25 +34,25 @@ fun TestAppTest.createUpdateInfo(updateAvailability: Int, installStatus: Int, im
 /**
  * A task that may [succeed] or [fail] on demand
  */
-abstract class TestUpdateInfoTask: Task<AppUpdateInfo>() {
-    private lateinit var onSuccessListener: OnSuccessListener<in AppUpdateInfo>
+abstract class TestTask<T>: Task<T>() {
+    private lateinit var onSuccessListener: OnSuccessListener<in T>
     private lateinit var onFailureListener: OnFailureListener
 
-    override fun addOnSuccessListener(p0: OnSuccessListener<in AppUpdateInfo>): Task<AppUpdateInfo> {
+    override fun addOnSuccessListener(p0: OnSuccessListener<in T>): Task<T> {
         onSuccessListener = p0
         return this
     }
 
-    override fun addOnFailureListener(p0: OnFailureListener): Task<AppUpdateInfo> {
+    override fun addOnFailureListener(p0: OnFailureListener): Task<T> {
         onFailureListener = p0
         return this
     }
 
     /**
-     * Calls success listener with [updateInfo]
+     * Calls success listener with [result]
      */
-    fun succeed(updateInfo: AppUpdateInfo) {
-        onSuccessListener.onSuccess(updateInfo)
+    fun succeed(result: T?) {
+        onSuccessListener.onSuccess(result)
     }
 
     /**
@@ -64,9 +64,24 @@ abstract class TestUpdateInfoTask: Task<AppUpdateInfo>() {
 }
 
 /**
- * Creates a test task
+ * A task to check update info
+ */
+abstract class TestUpdateInfoTask: TestTask<AppUpdateInfo>()
+
+/**
+ * A task to install update
+ */
+abstract class TestInstallTask: TestTask<Void>()
+
+/**
+ * Creates a test info task
  */
 fun createTestInfoTask(): TestUpdateInfoTask = spy()
+
+/**
+ * Creates a test install task
+ */
+fun createTestInstallTask(): TestInstallTask = spy()
 
 /**
  * Requests update info and executes [block] when returned
