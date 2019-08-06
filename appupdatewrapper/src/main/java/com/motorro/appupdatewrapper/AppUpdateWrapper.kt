@@ -13,15 +13,14 @@ import com.google.android.play.core.appupdate.AppUpdateManager
 interface AppUpdateWrapper {
     companion object {
         /**
-         * Originally, updating a list of subscribers within event dispatching crashes AppUpdateManager dispatcher
-         * with concurrent update exception.
-         * If your application may use several listeners simultaneously (like you have multiple activity setup) - keep
-         * that value `true`
+         * Originally, updating a list of subscribers within event dispatching crashes AppUpdateManager with concurrent
+         * update exception. If your application uses several listeners simultaneously (like you have multiple activity
+         * setup) or you encounter such an exception - set this value to true
          * TODO: Remove the duct tape as soon as original library becomes friendly to multiple subscribers
          * @see AppUpdateManager.registerListener
          * @see AppUpdateManager.unregisterListener
          */
-        var USE_SAFE_LISTENERS = true
+        var USE_SAFE_LISTENERS = false
     }
 
     /**
