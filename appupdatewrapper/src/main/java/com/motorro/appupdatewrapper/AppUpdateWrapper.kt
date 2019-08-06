@@ -42,4 +42,9 @@ interface AppUpdateWrapper {
      * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
      */
     fun userConfirmedUpdate()
+
+    /**
+     * Stops update workflow and cleans-up
+     */
+    fun cleanup()
 }

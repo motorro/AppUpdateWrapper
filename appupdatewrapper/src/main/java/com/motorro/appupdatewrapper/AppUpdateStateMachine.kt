@@ -1,5 +1,6 @@
 package com.motorro.appupdatewrapper
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event.*
 import androidx.lifecycle.LifecycleObserver
@@ -47,7 +48,8 @@ internal class AppUpdateLifecycleStateMachine(
     /**
      * Current update state
      */
-    private var currentUpdateState: AppUpdateState
+    @VisibleForTesting
+    var currentUpdateState: AppUpdateState
 
     init {
         currentUpdateState = None()
@@ -116,5 +118,13 @@ internal class AppUpdateLifecycleStateMachine(
      */
     override fun userConfirmedUpdate() {
         currentUpdateState.userConfirmedUpdate()
+    }
+
+    /**
+     * Stops update workflow and cleans-up
+     */
+    override fun cleanup() {
+        lifecycle.removeObserver(this)
+        currentUpdateState = None()
     }
 }

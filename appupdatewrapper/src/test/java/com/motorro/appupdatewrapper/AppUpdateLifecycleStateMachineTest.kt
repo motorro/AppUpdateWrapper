@@ -8,6 +8,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 class AppUpdateLifecycleStateMachineTest: TestAppTest() {
@@ -62,5 +63,19 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
         stateMachine.setUpdateState(state)
         verify(state).onStart()
         verify(state).onResume()
+    }
+
+    @Test
+    fun initializes() {
+        verify(lifecycle).addObserver(stateMachine)
+        assertTrue { stateMachine.currentUpdateState is None}
+    }
+
+    @Test
+    fun cleansUp() {
+        stateMachine.setUpdateState(state)
+        stateMachine.cleanup()
+        verify(lifecycle).removeObserver(stateMachine)
+        assertTrue { stateMachine.currentUpdateState is None}
     }
 }

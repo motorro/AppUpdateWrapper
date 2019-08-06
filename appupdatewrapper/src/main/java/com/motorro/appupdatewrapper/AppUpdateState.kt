@@ -118,7 +118,7 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
     /**
      * Called by state-machine when state is being replaced
      */
-    open fun cleanup() = Unit
+    override fun cleanup() = Unit
 }
 
 /**
