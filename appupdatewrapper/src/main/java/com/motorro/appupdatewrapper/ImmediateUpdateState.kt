@@ -100,11 +100,18 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
         }
 
         /**
+         * Called by state-machine when state is being replaced
+         */
+        override fun cleanup() {
+            super.cleanup()
+            stopped = true
+        }
+
+        /**
          * Handles lifecycle `onStop`
          */
         override fun onStop() {
             super.onStop()
-            stopped = true
             complete()
         }
 
