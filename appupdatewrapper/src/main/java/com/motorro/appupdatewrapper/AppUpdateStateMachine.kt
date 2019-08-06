@@ -98,7 +98,7 @@ internal class AppUpdateLifecycleStateMachine(
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
     override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean =
-        currentUpdateState.checkActivityResult(resultCode, requestCode)
+        currentUpdateState.checkActivityResult(requestCode, resultCode)
 
     /**
      * Cancels update installation

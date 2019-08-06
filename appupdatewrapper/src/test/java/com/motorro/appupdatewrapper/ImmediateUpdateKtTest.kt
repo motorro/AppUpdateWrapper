@@ -1,10 +1,11 @@
 package com.motorro.appupdatewrapper
 
+import android.app.Activity
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
-import com.motorro.appupdatewrapper.testapp.ImmediateUpdateActivity
+import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -15,22 +16,26 @@ class ImmediateUpdateKtTest: TestAppTest() {
     @Test
     fun startsImmediateUpdateIfAvailable() {
         lateinit var updateManager: FakeAppUpdateManager
-        val scenario = launch(ImmediateUpdateActivity::class.java)
+        val scenario = launch(TestUpdateActivity::class.java)
         scenario.onActivity {
             updateManager = FakeAppUpdateManager(it).apply {
                 setUpdateAvailable(100500)
                 partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
             }
-            it.startImmediateUpdate(updateManager, it)
-        }
+            it.updateWrapper = it.startImmediateUpdate(updateManager, it)
 
-        assertTrue(updateManager.isImmediateFlowVisible)
+            assertTrue(updateManager.isImmediateFlowVisible)
+            // Emulate update success
+            it.passActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_OK)
+
+            assertEquals(TestUpdateActivity.RESULT_SUCCESS, scenario.result.resultCode)
+        }
     }
 
     @Test
     fun failsIfUpdateIsNotAvailable() {
         lateinit var updateManager: FakeAppUpdateManager
-        val scenario = launch(ImmediateUpdateActivity::class.java)
+        val scenario = launch(TestUpdateActivity::class.java)
         scenario.onActivity {
             updateManager = FakeAppUpdateManager(it).apply {
                 setUpdateNotAvailable()
@@ -38,6 +43,6 @@ class ImmediateUpdateKtTest: TestAppTest() {
             it.startImmediateUpdate(updateManager, it)
         }
 
-        assertEquals(ImmediateUpdateActivity.RESULT_FAILURE, scenario.result.resultCode)
+        assertEquals(TestUpdateActivity.RESULT_FAILURE, scenario.result.resultCode)
     }
 }

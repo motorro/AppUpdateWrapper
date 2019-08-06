@@ -10,7 +10,9 @@ import com.google.android.play.core.appupdate.AppUpdateManager
  * and user needs to update the app immediately.
  *
  * * No user interaction supported
- * * Calls [AppUpdateView.updateComplete] when updateComplete (but you may not receive it as your app is restarted during update)
+
+ * * Calls [AppUpdateView.updateComplete] when update complete (but you may not receive it as your app is restarted
+ * during update installation)
  * * Calls [AppUpdateView.updateFailed] if update is not available or failed to install
  * @receiver Lifecycle owner (activity or fragment)
  * @param appUpdateManager AppUpdateManager instance
