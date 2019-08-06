@@ -108,13 +108,6 @@ interface TimeCancelledStorage {
  * @param storage SharedPreferences instance
  */
 internal class WithPreferences(private val storage: SharedPreferences, private val clock: Clock = Clock.SYSTEM): TimeCancelledStorage {
-    companion object {
-        /**
-         * SharedPreferences storage key
-         */
-        private const val LATEST_CANCEL_PROPERTY = "latestTimeCancelled"
-    }
-
     /**
      * Gets the latest time user has explicitly cancelled update
      */

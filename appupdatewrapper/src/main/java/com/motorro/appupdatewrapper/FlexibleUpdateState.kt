@@ -47,7 +47,15 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     protected fun updateConsentCheck() {
         stateMachine.setUpdateState(UpdateConsentCheck())
     }
-    
+
+
+    /**
+     * Transfers to install consent check
+     */
+    protected fun installConsentCheck() {
+        stateMachine.setUpdateState(InstallConsentCheck())
+    }
+
     /**
      * Transfers to downloading state
      */
@@ -181,7 +189,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
                         activity,
                         REQUEST_CODE_UPDATE
                     )
-                    // As consent activity starts application looses focus.
+                    // As consent activity starts current activity looses focus.
                     // So we need to transfer to the next state to break popup cycle.
                     updateConsentCheck()
                 }
@@ -275,9 +283,37 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
             super.onResume()
             ifNotBroken {
                 withUpdateView {
-                    updateInstallUiVisible()
+                    updateReady()
+                    // As consent activity starts current activity looses focus.
+                    // So we need to transfer to the next state to break popup cycle.
+                    installConsentCheck()
                 }
             }
+        }
+
+    }
+
+    /**
+     * Listens to install consent results
+     */
+    internal class InstallConsentCheck: FlexibleUpdateState() {
+        /**
+         * Completes update
+         * Call when update is downloaded and user confirmed app restart
+         * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
+         */
+        override fun userConfirmedUpdate() {
+            completeUpdate()
+        }
+
+        /**
+         * Cancels update installation
+         * Call when update is downloaded and user cancelled app restart
+         * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
+         */
+        override fun userCanceledUpdate() {
+            markUserCancelTime()
+            complete()
         }
     }
 

@@ -366,6 +366,39 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
+    fun installConsentStateWillCallUpdateReadyOnResumeAndSwitchToConsentCheck() {
+        val state = FlexibleUpdateState.InstallConsent().init()
+        state.onResume()
+        verify(view).updateReady()
+        verify(stateMachine).setUpdateState(any<FlexibleUpdateState.InstallConsentCheck>())
+    }
+
+    @Test
+    fun installConsentStateWillCompleteIfBroken() {
+        whenever(breaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
+        val state = FlexibleUpdateState.InstallConsent().init()
+        state.onResume()
+        verify(view, never()).updateReady()
+        verify(stateMachine).setUpdateState(any<Done>())
+    }
+
+    @Test
+    fun installConsentCheckWillCompleteUpdateOnConfirm() {
+        val state = FlexibleUpdateState.InstallConsentCheck().init()
+        state.userConfirmedUpdate()
+        verify(stateMachine).setUpdateState(any<FlexibleUpdateState.CompleteUpdate>())
+    }
+
+    @Test
+    fun installConsentCheckWillMarkCancelTimeAndCompleteOnCancel() {
+        val state = FlexibleUpdateState.InstallConsentCheck().init()
+        state.userCanceledUpdate()
+        verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.CompleteUpdate>())
+        verify(breaker).saveTimeCanceled()
+        verify(stateMachine).setUpdateState(any<Done>())
+    }
+
+    @Test
     @LooperMode(LooperMode.Mode.PAUSED)
     fun completeUpdateStateWillCompleteUpdateOnStart() {
         updateManager.setUpdateAvailable(100500)
@@ -380,6 +413,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
             shadowOf(getMainLooper()).idle()
             verify(updateManager).completeUpdate()
             verify(stateMachine).setUpdateState(any<Done>())
+            verify(view).updateInstallUiVisible()
         }
         shadowOf(getMainLooper()).idle()
     }
