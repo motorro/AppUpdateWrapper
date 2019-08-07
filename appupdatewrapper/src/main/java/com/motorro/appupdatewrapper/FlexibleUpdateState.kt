@@ -240,7 +240,11 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         private val listener = InstallStateUpdatedListener { state ->
             when(state.installStatus()) {
-                CANCELED, INSTALLED -> complete()
+                INSTALLED -> complete()
+                CANCELED -> {
+                    markUserCancelTime()
+                    complete()
+                }
                 DOWNLOADED -> installConsent()
                 INSTALLING -> completeUpdate()
                 FAILED -> reportError(

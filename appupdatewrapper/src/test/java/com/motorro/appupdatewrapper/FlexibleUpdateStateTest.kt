@@ -208,7 +208,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
-    fun downloadingStateWillSetCompleteUpdateWhenCancelled() {
+    fun downloadingStateWillSetCompleteUpdateAndMarkCancellationTimeWhenCancelled() {
         updateManager.setUpdateAvailable(100500)
         updateManager.withInfo {
             startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
@@ -222,6 +222,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
             userCancelsDownload()
             verify(stateMachine).setUpdateState(any<Done>())
+            verify(breaker).saveTimeCanceled()
         }
         shadowOf(getMainLooper()).idle()
     }
