@@ -190,15 +190,16 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
                 if (false == updateInfo.isUpdateTypeAllowed(FLEXIBLE)) {
                     reportError(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
                 } else withUpdateView {
+                    // As consent activity starts current activity looses focus.
+                    // So we need to transfer to the next state to break popup cycle.
+                    updateConsentCheck()
+
                     stateMachine.updateManager.startUpdateFlowForResult(
                         updateInfo,
                         FLEXIBLE,
                         activity,
                         REQUEST_CODE_UPDATE
                     )
-                    // As consent activity starts current activity looses focus.
-                    // So we need to transfer to the next state to break popup cycle.
-                    updateConsentCheck()
                 }
             }
         }
@@ -290,10 +291,10 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
             super.onResume()
             ifNotBroken {
                 withUpdateView {
-                    updateReady()
                     // As consent activity starts current activity looses focus.
                     // So we need to transfer to the next state to break popup cycle.
                     installConsentCheck()
+                    updateReady()
                 }
             }
         }
