@@ -1,1 +1,1 @@
-include ':sample', ':appupdatewrapper', ':testapp'
+include ':appupdatewrapper', ':testapp'
