@@ -19,7 +19,7 @@ import android.content.SharedPreferences
 import java.util.concurrent.TimeUnit
 
 /**
- * Checks if user has already refused to install update and terminates   update flow
+ * Checks if user has already refused to install update and terminates update flow
  */
 interface UpdateFlowBreaker: TimeCancelledStorage {
     /**
