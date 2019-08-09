@@ -1,4 +1,5 @@
-# AppUpdateWrapper
+# AppUpdateWrapper [![Build Status](https://travis-ci.com/motorro/AppUpdateWrapper.svg?token=ZyJexBWWUzhwyHdkocKJ&branch=master)](https://travis-ci.com/motorro/AppUpdateWrapper) [ ![Download](https://api.bintray.com/packages/motorro/AppUpdateWrapper/appupdatewrapper/images/download.svg) ](https://bintray.com/motorro/AppUpdateWrapper/appupdatewrapper/_latestVersion)
+
 A wrapper for [Android AppUpdateManager](https://developer.android.com/reference/com/google/android/play/core/appupdate/AppUpdateManager) 
 to simplify in-app update flow.
 
