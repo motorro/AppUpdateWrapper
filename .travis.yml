@@ -50,7 +50,7 @@ jobs:
       script: skip
       deploy:
         provider: script
-        script: "./gradlew generatePomFileForMavenPublication bintrayUpload -x publishMavenPublicationToMavenLocal -PbintrayUser=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PdryRun=false --no-daemon"
+        script: "./gradlew assemble generatePomFileForReleasePublication -x publishToMavenLocal bintrayUpload -PbintrayUser=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PdryRun=false --no-daemon"
         skip_cleanup: true
         verbose: true
         on:
