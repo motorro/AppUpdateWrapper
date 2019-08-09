@@ -1,0 +1,57 @@
+language: android
+
+git:
+  depth: 150
+
+android:
+  components:
+  - tools
+  - platform-tools
+  - android-28
+  - build-tools-28.0.3
+  - extra-android-m2repository
+  - extra-google-m2repository
+licenses:
+  - 'android-sdk-preview-license-.+'
+  - 'android-sdk-license-.+'
+
+before_install:
+  - yes | sdkmanager "platforms;android-28"
+
+jdk:
+- oraclejdk8
+
+notifications:
+  email: false
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+  - $HOME/.android/build-cache
+
+stages:
+  - name: test
+  - name: deploy
+    if: |
+      fork = false \
+      AND tag =~ /^v[0-9]+\.[0-9]+\.[0-9]+/
+
+jobs:
+  include:
+    - stage: test
+      script: "./gradlew displayVersion build --no-daemon"
+    - stage: deploy
+      script: skip
+      deploy:
+        provider: script
+        script: "./gradlew generatePomFileForMavenPublication bintrayUpload -x publishMavenPublicationToMavenLocal -PbintrayUser=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PdryRun=false --no-daemon"
+        skip_cleanup: true
+        verbose: true
+        on:
+          tags: true
