@@ -2,7 +2,28 @@
 A wrapper for [Android AppUpdateManager](https://developer.android.com/reference/com/google/android/play/core/appupdate/AppUpdateManager) 
 to simplify in-app update flow.
 
-
+- [Features](#features)
+- [Basics](#basics)
+- [Using in your project](#using-in-your-project)
+  * [1. Setting up the dependency](#1-setting-up-the-dependency)
+  * [2. Implementing AppUpdateView](#2-implementing-appupdateview)
+    + [activity (mandatory)](#activity-mandatory)
+    + [updateReady (mandatory)](#updateready-mandatory)
+    + [updateFailed (mandatory)](#updatefailed-mandatory)
+    + [updateChecking (optional)](#updatechecking-optional)
+    + [updateInstallUiVisible (optional)](#updateinstalluivisible-optional)
+    + [updateComplete (optional)](#updatecomplete-optional)
+    + [nonCriticalUpdateError (optional)](#noncriticalupdateerror-optional)
+  * [3. Start your update flow](#3-start-your-update-flow)
+    + [checkActivityResult](#checkactivityresult)
+    + [userCanceledUpdate and userConfirmedUpdate](#usercanceledupdate-and-userconfirmedupdate)
+    + [cleanup](#cleanup)
+    + [Starting IMMEDIATE update](#starting-immediate-update)
+    + [Starting FLEXIBLE update](#starting-flexible-update)
+  * [Non-intrusive flexible updates with UpdateFlowBreaker](#non-intrusive-flexible-updates-with-updateflowbreaker)
+- [Using library in multi-activity setup](#using-library-in-multi-activity-setup)
+  * [AppUpdateManager instance](#appupdatemanager-instance)
+  * [Use safe event handlers](#use-safe-event-handlers)
 
 ## Features
 -   A complete [lifecycle-aware component](https://developer.android.com/topic/libraries/architecture/lifecycle) to take
@@ -334,6 +355,3 @@ class App: Application() {
     }
 }
 ```
-
-
-
