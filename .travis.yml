@@ -45,7 +45,7 @@ stages:
 jobs:
   include:
     - stage: test
-      script: "./gradlew displayVersion :appupdatewrapper:build --no-daemon"
+      script: "./gradlew displayVersion check --no-daemon"
     - stage: deploy
       script: skip
       deploy:
