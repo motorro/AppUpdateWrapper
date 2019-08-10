@@ -35,6 +35,21 @@ import kotlin.test.assertTrue
 @RunWith(AndroidJUnit4::class)
 internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
+    fun baseStateWillMarkCancellationTimeAndCompleteIfCancelled() {
+        val state = FlexibleUpdateState.Initial().init()
+        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_CANCELED))
+        verify(stateMachine.flowBreaker).saveTimeCanceled()
+        verify(stateMachine).setUpdateState(any<Done>())
+    }
+
+    @Test
+    fun baseStateWillNotHandleOtherRequests() {
+        val state = FlexibleUpdateState.Initial().init()
+        assertFalse(state.checkActivityResult(10, Activity.RESULT_OK))
+        verify(stateMachine, never()).setUpdateState(any())
+    }
+
+    @Test
     fun whenStartedSetsInitialState() {
         FlexibleUpdateState.start(stateMachine)
         verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Initial>())

@@ -16,6 +16,7 @@
 package com.motorro.appupdatewrapper
 
 import android.app.Activity
+import androidx.annotation.CallSuper
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
@@ -99,6 +100,21 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         stateMachine.flowBreaker.saveTimeCanceled()
     }
 
+    /**
+     * According to:
+     * https://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%2520int,%2520android.content.Intent)
+     * `onActivityResult` will be called before `onResume` thus saving explicit cancellation before any UI interaction
+     * takes place. This may prevent download consent popup if activity was recreated during consent display
+     */
+    @CallSuper
+    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean =
+        if (REQUEST_CODE_UPDATE == requestCode && Activity.RESULT_CANCELED == resultCode) {
+            markUserCancelTime()
+            complete()
+            true
+        } else {
+            false
+        }
 
     /**
      * Initial state
@@ -228,21 +244,18 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          * Checks activity result and returns `true` if result is an update result and was handled
          * Use to check update activity result in [android.app.Activity.onActivityResult]
          */
-        override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
-            if (REQUEST_CODE_UPDATE != requestCode) {
-                return false
-            }
-            when(resultCode) {
-                Activity.RESULT_OK -> {
-                    downloading()
+        override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean = when {
+            super.checkActivityResult(requestCode, resultCode) -> true
+            REQUEST_CODE_UPDATE != requestCode -> false
+            else -> {
+                when(resultCode) {
+                    Activity.RESULT_OK -> {
+                        downloading()
+                    }
+                    else -> reportError(AppUpdateException(ERROR_UNKNOWN_UPDATE_RESULT))
                 }
-                Activity.RESULT_CANCELED -> {
-                    markUserCancelTime()
-                    complete()
-                }
-                else -> reportError(AppUpdateException(ERROR_UNKNOWN_UPDATE_RESULT))
+                true
             }
-            return true
         }
     }
 
