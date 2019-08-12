@@ -19,6 +19,7 @@ import android.app.Activity
 import androidx.annotation.CallSuper
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED
 import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL_UNAVAILABLE
@@ -252,6 +253,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
                     Activity.RESULT_OK -> {
                         downloading()
                     }
+                    RESULT_IN_APP_UPDATE_FAILED -> reportError(AppUpdateException(ERROR_UPDATE_FAILED))
                     else -> reportError(AppUpdateException(ERROR_UNKNOWN_UPDATE_RESULT))
                 }
                 true

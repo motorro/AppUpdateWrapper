@@ -19,6 +19,7 @@ import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallStatus
@@ -388,9 +389,20 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
+    fun updateConsentCheckStateWillReportUpdateError() {
+        val state = FlexibleUpdateState.UpdateConsentCheck().init()
+        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, ActivityResult.RESULT_IN_APP_UPDATE_FAILED))
+        verify(stateMachine, never()).setUpdateState(any<Done>())
+        verify(stateMachine).setUpdateState(check {
+            it as Error
+            assertEquals(AppUpdateException.ERROR_UPDATE_FAILED, it.error.message)
+        })
+    }
+
+    @Test
     fun updateConsentCheckStateWillReportErrorOnUnknownResult() {
         val state = FlexibleUpdateState.UpdateConsentCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_FIRST_USER))
+        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.CONTEXT_RESTRICTED))
         verify(stateMachine, never()).setUpdateState(any<Done>())
         verify(stateMachine).setUpdateState(check {
             it as Error
