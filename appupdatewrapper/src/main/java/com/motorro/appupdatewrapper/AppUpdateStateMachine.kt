@@ -124,7 +124,7 @@ internal class AppUpdateLifecycleStateMachine(
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
     override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
-        Timber.d("Processing activity result: requestCode(%i), resultCode(%i)", requestCode, resultCode)
+        Timber.d("Processing activity result: requestCode(%d), resultCode(%d)", requestCode, resultCode)
         return currentUpdateState.checkActivityResult(requestCode, resultCode).also {
             Timber.d("Activity result handled: %b", it)
         }

@@ -91,9 +91,9 @@ internal class IntervalBreaker(
      */
     override fun isEnoughTimePassedSinceLatestCancel(): Boolean {
         val timeCancelled = storage.getTimeCanceled()
-        Timber.d("Last time cancelled: %l", timeCancelled)
+        Timber.d("Last time cancelled: %d", timeCancelled)
         val currentTime = clock.getMillis()
-        Timber.d("Current time: %l", currentTime)
+        Timber.d("Current time: %d", currentTime)
         return (currentTime - timeCancelled > intervalMillis).also {
             Timber.d("Has enough time passed since latest cancel: %s", if(it) "yes" else "no")
         }
