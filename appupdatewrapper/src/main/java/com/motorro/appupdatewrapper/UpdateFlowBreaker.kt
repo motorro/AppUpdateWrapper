@@ -16,6 +16,7 @@
 package com.motorro.appupdatewrapper
 
 import android.content.SharedPreferences
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
@@ -90,8 +91,12 @@ internal class IntervalBreaker(
      */
     override fun isEnoughTimePassedSinceLatestCancel(): Boolean {
         val timeCancelled = storage.getTimeCanceled()
+        Timber.d("Last time cancelled: %l", timeCancelled)
         val currentTime = clock.getMillis()
-        return currentTime - timeCancelled > intervalMillis
+        Timber.d("Current time: %l", currentTime)
+        return (currentTime - timeCancelled > intervalMillis).also {
+            Timber.d("Has enough time passed since latest cancel: %s", if(it) "yes" else "no")
+        }
     }
 }
 
