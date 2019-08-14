@@ -23,6 +23,7 @@ import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAI
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_NO_IMMEDIATE_UPDATE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
+import timber.log.Timber
 
 /**
  * Immediate update flow
@@ -35,16 +36,6 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         fun start(stateMachine: AppUpdateStateMachine) {
             stateMachine.setUpdateState(Initial())
-        }
-
-        /**
-         * Forces immediate update start
-         * @param stateMachine Application update stateMachine state-machine
-         * @param appUpdateInfo Application update info
-         * @see FlexibleUpdateState.Checking
-         */
-        fun doUpdate(stateMachine: AppUpdateStateMachine, appUpdateInfo: AppUpdateInfo) {
-            stateMachine.setUpdateState(Update(appUpdateInfo))
         }
     }
 
@@ -100,14 +91,17 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
             withUpdateView {
                 updateChecking()
             }
+            Timber.i("Getting application update info for IMMEDIATE update...")
             updateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
+                    Timber.i("Application update info: %s", it.toLoggingString())
                     if (!stopped) {
                         processUpdateInfo(it)
                     }
                 }
                 .addOnFailureListener {
+                    Timber.w(it, "Error getting application update info: ")
                     if (!stopped) {
                         reportUpdateCheckFailure(it)
                     }
@@ -134,6 +128,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          * Transfers to failed state
          */
         private fun reportUpdateCheckFailure(appUpdateException: Throwable) {
+            Timber.d("Failing update due to update check...")
             fail(AppUpdateException(ERROR_UPDATE_FAILED, appUpdateException))
         }
 
@@ -141,6 +136,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          * Starts update on success or transfers to failed state
          */
         private fun processUpdateInfo(appUpdateInfo: AppUpdateInfo) {
+            Timber.d("Evaluating update info...")
             when (appUpdateInfo.updateAvailability()) {
                 UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> update(appUpdateInfo)
                 else -> fail(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
@@ -150,7 +146,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
 
     /**
      * Updates application
-     * @param updateInfo Update info to start imeediate update
+     * @param updateInfo Update info to start immediate update
      */
     internal class Update(private val updateInfo: AppUpdateInfo): ImmediateUpdateState() {
         /**
@@ -159,8 +155,10 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
         override fun onResume() {
             super.onResume()
             if (false == updateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
+                Timber.d("Update type IMMEDIATE is not allowed!")
                 fail(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
             } else withUpdateView {
+                Timber.d("Failing update due to update check failure...")
                 updateManager.startUpdateFlowForResult(
                     updateInfo,
                     IMMEDIATE,
@@ -187,8 +185,10 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
             }
 
             if (Activity.RESULT_OK == resultCode) {
+                Timber.d("Update installation complete")
                 complete()
             } else {
+                Timber.d("Failing update due to installation failure...")
                 fail(AppUpdateException(ERROR_UPDATE_FAILED))
             }
 

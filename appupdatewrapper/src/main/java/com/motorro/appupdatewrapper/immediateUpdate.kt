@@ -18,6 +18,7 @@ package com.motorro.appupdatewrapper
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.play.core.appupdate.AppUpdateManager
+import timber.log.Timber
 
 /**
  * Starts immediate update
@@ -36,5 +37,6 @@ import com.google.android.play.core.appupdate.AppUpdateManager
 @MainThread
 fun LifecycleOwner.startImmediateUpdate(appUpdateManager: AppUpdateManager, view: AppUpdateView): AppUpdateWrapper =
     AppUpdateLifecycleStateMachine(lifecycle, appUpdateManager, view).also {
+        Timber.d("Starting immediate update flow...")
         ImmediateUpdateState.start(it)
     }

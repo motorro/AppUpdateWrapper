@@ -17,6 +17,7 @@ package com.motorro.appupdatewrapper
 
 import androidx.annotation.VisibleForTesting
 import com.google.android.play.core.appupdate.AppUpdateManager
+import timber.log.Timber
 
 /**
  * Application update state interface
@@ -100,22 +101,30 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
     /**
      * Handles lifecycle `onStart`
      */
-    open fun onStart() = Unit
+    open fun onStart() {
+        Timber.d("onStart")
+    }
 
     /**
      * Handles lifecycle `onStop`
      */
-    open fun onStop() = Unit
+    open fun onStop() {
+        Timber.d("onStop")
+    }
 
     /**
      * Handles lifecycle `onPause`
      */
-    open fun onPause() = Unit
+    open fun onPause() {
+        Timber.d("onPause")
+    }
 
     /**
      * Handles lifecycle `onResume`
      */
-    open fun onResume() = Unit
+    open fun onResume() {
+        Timber.d("onResume")
+    }
 
     /**
      * Checks activity result and returns `true` if result is an update result and was handled
@@ -140,7 +149,9 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
     /**
      * Called by state-machine when state is being replaced
      */
-    override fun cleanup() = Unit
+    override fun cleanup() {
+        Timber.d("cleanup")
+    }
 }
 
 /**
@@ -193,6 +204,7 @@ internal class Failed(@VisibleForTesting val error: AppUpdateException) : AppUpd
      */
     override fun onResume() {
         super.onResume()
+        Timber.w(error, "Application update failure: ")
         withUpdateView {
             updateFailed(error)
             setNone()
