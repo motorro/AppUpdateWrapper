@@ -52,21 +52,21 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
      * Transfers to checking state
      */
     protected fun checking() {
-        stateMachine.setUpdateState(Checking())
+        setUpdateState(Checking())
     }
 
     /**
      * Transfers to update state
      */
     protected fun update(appUpdateInfo: AppUpdateInfo) {
-        stateMachine.setUpdateState(Update(appUpdateInfo))
+        setUpdateState(Update(appUpdateInfo))
     }
 
     /**
      * Transfers to update ui check
      */
     protected fun updateUiCheck() {
-        stateMachine.setUpdateState(UpdateUiCheck())
+        setUpdateState(UpdateUiCheck())
     }
 
     /**

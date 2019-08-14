@@ -48,21 +48,21 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
      * Transfers to update-checking state
      */
     protected fun checking() {
-        stateMachine.setUpdateState(Checking())
+        setUpdateState(Checking())
     }
 
     /**
      * Transfers to update-consent state
      */
     protected fun updateConsent(appUpdateInfo: AppUpdateInfo) {
-        stateMachine.setUpdateState(UpdateConsent(appUpdateInfo))
+        setUpdateState(UpdateConsent(appUpdateInfo))
     }
 
     /**
      * Transfers to update consent check
      */
     protected fun updateConsentCheck() {
-        stateMachine.setUpdateState(UpdateConsentCheck())
+        setUpdateState(UpdateConsentCheck())
     }
 
 
@@ -70,35 +70,28 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
      * Transfers to install consent check
      */
     protected fun installConsentCheck() {
-        stateMachine.setUpdateState(InstallConsentCheck())
+        setUpdateState(InstallConsentCheck())
     }
 
     /**
      * Transfers to downloading state
      */
     protected fun downloading() {
-        stateMachine.setUpdateState(Downloading())
+        setUpdateState(Downloading())
     }
 
     /**
      * Transfers to install-consent state
      */
     protected fun installConsent() {
-        stateMachine.setUpdateState(InstallConsent())
+        setUpdateState(InstallConsent())
     }
 
     /**
      * Transfers to complete-update state
      */
     protected fun completeUpdate() {
-        stateMachine.setUpdateState(CompleteUpdate())
-    }
-
-    /**
-     * Saves time user has explicitly cancelled update
-     */
-    protected fun markUserCancelTime() {
-        stateMachine.flowBreaker.saveTimeCanceled()
+        setUpdateState(CompleteUpdate())
     }
 
     /**

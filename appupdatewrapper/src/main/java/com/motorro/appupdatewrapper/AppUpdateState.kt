@@ -61,6 +61,13 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
     }
 
     /**
+     * Saves time user has explicitly cancelled update
+     */
+    protected fun markUserCancelTime() {
+        stateMachine.flowBreaker.saveTimeCanceled()
+    }
+
+    /**
      * Sets a dummy state
      */
     protected open fun setNone() {
