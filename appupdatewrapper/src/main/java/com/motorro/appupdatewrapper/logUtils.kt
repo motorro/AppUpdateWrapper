@@ -18,6 +18,7 @@ package com.motorro.appupdatewrapper
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
+import com.google.android.play.core.install.model.InstallErrorCode
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 
@@ -49,9 +50,9 @@ private fun AppUpdateInfo.formatUpdateAvailability(): String = when(updateAvaila
 }
 
 /**
- * Returns a constant name for update availability
+ * Returns a constant name for update status
  */
-private fun AppUpdateInfo.formatInstallStatus(): String = when(installStatus()) {
+internal fun formatInstallStatus(status: Int): String = when(status) {
     InstallStatus.UNKNOWN -> "UNKNOWN"
     InstallStatus.REQUIRES_UI_INTENT -> "REQUIRES_UI_INTENT"
     InstallStatus.PENDING -> "PENDING"
@@ -61,9 +62,33 @@ private fun AppUpdateInfo.formatInstallStatus(): String = when(installStatus()) 
     InstallStatus.INSTALLED -> "INSTALLED"
     InstallStatus.FAILED -> "FAILED"
     InstallStatus.CANCELED -> "CANCELED"
-    else -> "UNKNOWN INSTALL STATUS: ${installStatus()}"
+    else -> "UNKNOWN INSTALL STATUS: ${status}"
 }
 
+/**
+ * Returns a constant name for installation error
+ */
+internal fun formatInstallErrorCode(code: Int): String = when(code) {
+    InstallErrorCode.NO_ERROR -> "NO_ERROR"
+    InstallErrorCode.NO_ERROR_PARTIALLY_ALLOWED -> "NO_ERROR_PARTIALLY_ALLOWED"
+    InstallErrorCode.ERROR_UNKNOWN -> "ERROR_UNKNOWN"
+    InstallErrorCode.ERROR_API_NOT_AVAILABLE -> "ERROR_API_NOT_AVAILABLE"
+    InstallErrorCode.ERROR_INVALID_REQUEST -> "ERROR_INVALID_REQUEST"
+    InstallErrorCode.ERROR_INSTALL_UNAVAILABLE -> "ERROR_INSTALL_UNAVAILABLE"
+    InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED -> "ERROR_INSTALL_UNAVAILABLE"
+    InstallErrorCode.ERROR_DOWNLOAD_NOT_PRESENT -> "ERROR_DOWNLOAD_NOT_PRESENT"
+    InstallErrorCode.ERROR_INTERNAL_ERROR -> "ERROR_INTERNAL_ERROR"
+    else -> "UNKNOWN INSTALL ERROR: ${code}"
+}
+
+/**
+ * Returns a constant name for update status
+ */
+private fun AppUpdateInfo.formatInstallStatus(): String = formatInstallStatus(installStatus())
+
+/**
+ * Retrieves allowed update types
+ */
 private fun AppUpdateInfo.formatUpdateTypesAllowed(): String {
     var result = "NONE"
     if (isUpdateTypeAllowed(FLEXIBLE)) {

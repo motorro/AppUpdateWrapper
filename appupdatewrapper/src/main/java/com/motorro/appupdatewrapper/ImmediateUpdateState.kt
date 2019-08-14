@@ -158,7 +158,11 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
                 Timber.d("Update type IMMEDIATE is not allowed!")
                 fail(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
             } else withUpdateView {
-                Timber.d("Failing update due to update check failure...")
+                // As consent activity starts current activity looses focus.
+                // So we need to transfer to the next state to break popup cycle.
+                updateUiCheck()
+
+                Timber.d("Starting play-core update installer for IMMEDIATE state...")
                 updateManager.startUpdateFlowForResult(
                     updateInfo,
                     IMMEDIATE,
@@ -166,7 +170,6 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
                     REQUEST_CODE_UPDATE
                 )
                 updateInstallUiVisible()
-                updateUiCheck()
             }
         }
     }

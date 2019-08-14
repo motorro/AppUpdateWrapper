@@ -29,6 +29,7 @@ import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAI
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UNKNOWN_UPDATE_RESULT
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
+import timber.log.Timber
 
 /**
  * Flexible update flow
@@ -103,6 +104,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
     @CallSuper
     override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean =
         if (REQUEST_CODE_UPDATE == requestCode && Activity.RESULT_CANCELED == resultCode) {
+            Timber.d("Update download cancelled")
             markUserCancelTime()
             complete()
             true
@@ -142,14 +144,17 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
                 withUpdateView {
                     updateChecking()
                 }
+                Timber.i("Getting application update info for FLEXIBLE update...")
                 updateManager
                     .appUpdateInfo
                     .addOnSuccessListener {
+                        Timber.i("Application update info: %s", it.toLoggingString())
                         if (!stopped) {
                             processUpdateInfo(it)
                         }
                     }
                     .addOnFailureListener {
+                        Timber.w(it, "Error getting application update info: ")
                         if (!stopped) {
                             reportUpdateCheckFailure(it)
                         }
@@ -177,6 +182,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          * Transfers to failed state
          */
         private fun reportUpdateCheckFailure(appUpdateException: Throwable) {
+            Timber.d("Reporting update error due to update check...")
             reportError(AppUpdateException(AppUpdateException.ERROR_UPDATE_CHECK_FAILED, appUpdateException))
         }
 
@@ -184,6 +190,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          * Starts update on success or transfers to failed state
          */
         private fun processUpdateInfo(appUpdateInfo: AppUpdateInfo) {
+            Timber.d("Evaluating update info...")
             with(appUpdateInfo) {
                 when (updateAvailability()) {
                     DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> when (installStatus()) {
@@ -213,12 +220,14 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
             super.onResume()
             ifNotBroken {
                 if (false == updateInfo.isUpdateTypeAllowed(FLEXIBLE)) {
+                    Timber.d("Update type FLEXIBLE is not allowed!")
                     reportError(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
                 } else withUpdateView {
                     // As consent activity starts current activity looses focus.
                     // So we need to transfer to the next state to break popup cycle.
                     updateConsentCheck()
 
+                    Timber.d("Asking for installation consent...")
                     stateMachine.updateManager.startUpdateFlowForResult(
                         updateInfo,
                         FLEXIBLE,
@@ -244,10 +253,17 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
             else -> {
                 when(resultCode) {
                     Activity.RESULT_OK -> {
+                        Timber.d("User accepted update")
                         downloading()
                     }
-                    RESULT_IN_APP_UPDATE_FAILED -> reportError(AppUpdateException(ERROR_UPDATE_FAILED))
-                    else -> reportError(AppUpdateException(ERROR_UNKNOWN_UPDATE_RESULT))
+                    RESULT_IN_APP_UPDATE_FAILED -> {
+                        Timber.d("Reporting update error due to play-core UI error...")
+                        reportError(AppUpdateException(ERROR_UPDATE_FAILED))
+                    }
+                    else -> {
+                        Timber.w("Failing due to unknown play-core UI result...")
+                        reportError(AppUpdateException(ERROR_UNKNOWN_UPDATE_RESULT))
+                    }
                 }
                 true
             }
@@ -262,6 +278,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          * Update state listener
          */
         private val listener = InstallStateUpdatedListener { state ->
+            Timber.d("Install state updated: %s", formatInstallStatus(state.installStatus()))
             when(state.installStatus()) {
                 INSTALLED -> complete()
                 CANCELED -> {
@@ -270,14 +287,18 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
                 }
                 DOWNLOADED -> installConsent()
                 INSTALLING -> completeUpdate()
-                FAILED -> reportError(
-                    AppUpdateException(
-                        when(state.installErrorCode()) {
-                            ERROR_INSTALL_UNAVAILABLE, ERROR_INSTALL_NOT_ALLOWED -> ERROR_UPDATE_TYPE_NOT_ALLOWED
-                            else -> ERROR_UPDATE_FAILED
-                        }
+                FAILED -> {
+                    val errorCode = state.installErrorCode()
+                    Timber.d("Install error code: %s", formatInstallErrorCode(errorCode))
+                    reportError(
+                        AppUpdateException(
+                            when(state.installErrorCode()) {
+                                ERROR_INSTALL_UNAVAILABLE, ERROR_INSTALL_NOT_ALLOWED -> ERROR_UPDATE_TYPE_NOT_ALLOWED
+                                else -> ERROR_UPDATE_FAILED
+                            }
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -286,6 +307,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun onResume() {
             super.onResume()
+            Timber.d("Registering to installation state updates...")
             updateManager.registerListenerSafe(listener)
         }
 
@@ -303,6 +325,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun cleanup() {
             super.cleanup()
+            Timber.d("Unregistering from installation state updates...")
             updateManager.unregisterListenerSafe(listener)
         }
     }
@@ -317,6 +340,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
         override fun onResume() {
             super.onResume()
             ifNotBroken {
+                Timber.d("Getting installation consent...")
                 withUpdateView {
                     // As consent activity starts current activity looses focus.
                     // So we need to transfer to the next state to break popup cycle.
@@ -367,14 +391,17 @@ internal sealed class FlexibleUpdateState(): AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
+            Timber.d("Starting play-core update installer for FLEXIBLE state...")
             updateManager
                 .completeUpdate()
                 .addOnSuccessListener {
+                    Timber.d("Update installation complete")
                     if (!stopped) {
                         complete()
                     }
                 }
                 .addOnFailureListener {
+                    Timber.d("Reporting update error due to installation failure...")
                     if (!stopped) {
                         reportError(AppUpdateException(ERROR_UPDATE_FAILED, it))
                     }

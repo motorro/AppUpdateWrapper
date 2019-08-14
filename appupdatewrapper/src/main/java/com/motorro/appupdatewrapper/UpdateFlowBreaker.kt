@@ -137,9 +137,11 @@ internal class WithPreferences(private val storage: SharedPreferences, private v
      * Saves current time as the latest one user has explicitly cancelled update
      */
     override fun saveTimeCanceled() {
+        val currentTime = clock.getMillis()
+        Timber.d("Saving time cancelled: %d", currentTime)
         storage
             .edit()
-            .putLong(LATEST_CANCEL_PROPERTY, clock.getMillis())
+            .putLong(LATEST_CANCEL_PROPERTY, currentTime)
             .apply()
     }
 }
