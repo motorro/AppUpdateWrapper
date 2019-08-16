@@ -3,6 +3,8 @@
 A wrapper for [Android AppUpdateManager](https://developer.android.com/reference/com/google/android/play/core/appupdate/AppUpdateManager) 
 to simplify in-app update flow.
 
+<!-- toc -->
+
 - [Features](#features)
 - [Basics](#basics)
 - [Using in your project](#using-in-your-project)
@@ -25,6 +27,11 @@ to simplify in-app update flow.
 - [Using library in multi-activity setup](#using-library-in-multi-activity-setup)
   * [AppUpdateManager instance](#appupdatemanager-instance)
   * [Use safe event handlers](#use-safe-event-handlers)
+- [Logging](#logging)
+  * [Enabling logger](#enabling-logger)
+  * [Logging rules](#logging-rules)
+
+<!-- tocstop -->
 
 ## Features
 -   A complete [lifecycle-aware component](https://developer.android.com/topic/libraries/architecture/lifecycle) to take
@@ -358,11 +365,11 @@ class App: Application() {
 ```
 
 ## Logging
-Sometimes you'll want to see what is going on in an update flow. The library supports logging to 
+Sometimes you'll want to see what is going on in the update flow. The library supports logging to 
 [Timber](https://github.com/JakeWharton/timber). 
 
 ### Enabling logger
-The library itself does not plant any tree - you need to do it to get log output:
+The library itself does not plant any tree - you need to do it yourself to get log output:
 ```kotlin
 class App: Application() {
     override fun onCreate() {
@@ -378,7 +385,7 @@ class App: Application() {
 *   All library log output has common tag prefix: `AUW`. 
 *   Checking for update and update results have `info` level.
 *   Update check failure and critical errors have `warning` level.
-*   Internals (state transition, lifecycle updates) have `debug` level
+*   Internals (state transition, lifecycle updates) have `debug` level.
 
 All-in-all the library log looks like this:
 ```
