@@ -356,3 +356,45 @@ class App: Application() {
     }
 }
 ```
+
+## Logging
+Sometimes you'll want to see what is going on in an update flow. The library supports logging to 
+[Timber](https://github.com/JakeWharton/timber). 
+
+### Enabling logger
+The library itself does not plant any tree - you need to do it to get log output:
+```kotlin
+class App: Application() {
+    override fun onCreate() {
+        super.onCreate()
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+    }
+}
+```
+
+### Logging rules
+*   All library log output has common tag prefix: `AUW`. 
+*   Checking for update and update results have `info` level.
+*   Update check failure and critical errors have `warning` level.
+*   Internals (state transition, lifecycle updates) have `debug` level
+
+All-in-all the library log looks like this:
+```
+D/AUW::AppUpdateLifecycleStateMachine: State machine initialized
+D/AUW:startImmediateUpdate: Starting FLEXIBLE update flow...
+D/AUW::AppUpdateLifecycleStateMachine: Setting new state: Initial
+D/AUW::Initial: onStart
+D/AUW::AppUpdateLifecycleStateMachine: Setting new state: Checking
+D/AUW::AppUpdateLifecycleStateMachine: Starting new state...
+D/AUW::Checking: onStart
+D/AUW::IntervalBreaker: Last time cancelled: 0, Current time: 1565980326128, Enough time passed: yes
+I/AUW::Checking: Getting application update info for FLEXIBLE update...
+I/AUW::Checking: Application update info: Update info: 
+        - available version code: 62107400
+        - update availability: UPDATE_NOT_AVAILABLE
+        - install status: UNKNOWN
+        - update types allowed: NONE
+D/AUW::Checking: Evaluating update info...
+```
