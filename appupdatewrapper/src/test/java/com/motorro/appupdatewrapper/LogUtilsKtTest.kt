@@ -60,7 +60,7 @@ class LogUtilsKtTest: TestAppTest() {
                         - install status: UNKNOWN
                         - update types allowed: FLEXIBLE, IMMEDIATE
                 """.trimIndent(),
-                it.toLoggingString()
+                it.format()
             )
         }
         shadowOf(getMainLooper()).idle()

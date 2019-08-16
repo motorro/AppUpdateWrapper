@@ -96,7 +96,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState(), Tagged {
             updateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
-                    timber.i("Application update info: %s", it.toLoggingString())
+                    timber.i("Application update info: %s", it.format())
                     if (!stopped) {
                         processUpdateInfo(it)
                     }

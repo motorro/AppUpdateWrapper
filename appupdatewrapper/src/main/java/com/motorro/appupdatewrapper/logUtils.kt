@@ -64,9 +64,9 @@ private const val APP_UPDATE_INFO_FORMAT = """Update info:
     - update types allowed: %s"""
 
 /**
- * Logs update info in human-readable format
+ * Formats update info into human-readable format
  */
-internal fun AppUpdateInfo.toLoggingString(): String = APP_UPDATE_INFO_FORMAT.format(
+fun AppUpdateInfo.format(): String = APP_UPDATE_INFO_FORMAT.format(
     availableVersionCode(),
     formatUpdateAvailability(),
     formatInstallStatus(),
@@ -86,8 +86,9 @@ private fun AppUpdateInfo.formatUpdateAvailability(): String = when(updateAvaila
 
 /**
  * Returns a constant name for update status
+ * @param status Install status
  */
-internal fun formatInstallStatus(status: Int): String = when(status) {
+fun formatInstallStatus(status: Int): String = when(status) {
     InstallStatus.UNKNOWN -> "UNKNOWN"
     InstallStatus.REQUIRES_UI_INTENT -> "REQUIRES_UI_INTENT"
     InstallStatus.PENDING -> "PENDING"
@@ -102,8 +103,9 @@ internal fun formatInstallStatus(status: Int): String = when(status) {
 
 /**
  * Returns a constant name for installation error
+ * @param code Installation error code
  */
-internal fun formatInstallErrorCode(code: Int): String = when(code) {
+fun formatInstallErrorCode(code: Int): String = when(code) {
     InstallErrorCode.NO_ERROR -> "NO_ERROR"
     InstallErrorCode.NO_ERROR_PARTIALLY_ALLOWED -> "NO_ERROR_PARTIALLY_ALLOWED"
     InstallErrorCode.ERROR_UNKNOWN -> "ERROR_UNKNOWN"
