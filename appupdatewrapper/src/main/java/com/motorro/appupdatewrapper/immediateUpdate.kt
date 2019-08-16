@@ -37,6 +37,6 @@ import timber.log.Timber
 @MainThread
 fun LifecycleOwner.startImmediateUpdate(appUpdateManager: AppUpdateManager, view: AppUpdateView): AppUpdateWrapper =
     AppUpdateLifecycleStateMachine(lifecycle, appUpdateManager, view).also {
-        Timber.d("Starting immediate update flow...")
+        Timber.tag(trimmedTag("$LIBRARY_LOG_PREFIX:startImmediateUpdate")).d("Starting IMMEDIATE update flow...")
         ImmediateUpdateState.start(it)
     }

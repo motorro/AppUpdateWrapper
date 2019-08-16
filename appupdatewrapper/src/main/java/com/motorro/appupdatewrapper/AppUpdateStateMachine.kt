@@ -21,7 +21,6 @@ import androidx.lifecycle.Lifecycle.Event.*
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.google.android.play.core.appupdate.AppUpdateManager
-import timber.log.Timber
 
 /**
  * App update state machine
@@ -60,7 +59,7 @@ internal class AppUpdateLifecycleStateMachine(
     override val updateManager: AppUpdateManager,
     override val view: AppUpdateView,
     override val flowBreaker: UpdateFlowBreaker = UpdateFlowBreaker.alwaysOn()
-): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver {
+): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver, Tagged {
     /**
      * Current update state
      */
@@ -70,14 +69,14 @@ internal class AppUpdateLifecycleStateMachine(
     init {
         currentUpdateState = None()
         lifecycle.addObserver(this)
-        Timber.d("State machine initialized")
+        timber.d("State machine initialized")
     }
 
     /**
      * Sets new update state
      */
     override fun setUpdateState(newState: AppUpdateState) {
-        Timber.d("Setting new state: %s", newState.javaClass.simpleName)
+        timber.d("Setting new state: %s", newState.javaClass.simpleName)
         currentUpdateState.cleanup()
 
         newState.stateMachine = this
@@ -85,11 +84,11 @@ internal class AppUpdateLifecycleStateMachine(
 
         with(lifecycle.currentState) {
             if (isAtLeast(Lifecycle.State.STARTED)) {
-                Timber.d("Starting new state...")
+                timber.d("Starting new state...")
                 newState.onStart()
             }
             if (isAtLeast(Lifecycle.State.RESUMED)) {
-                Timber.d("Resuming new state...")
+                timber.d("Resuming new state...")
                 newState.onResume()
             }
         }
@@ -97,25 +96,21 @@ internal class AppUpdateLifecycleStateMachine(
 
     @OnLifecycleEvent(ON_START)
     fun onStart() {
-        Timber.d("onStart")
         currentUpdateState.onStart()
     }
 
     @OnLifecycleEvent(ON_RESUME)
     fun onResume() {
-        Timber.d("onResume")
         currentUpdateState.onResume()
     }
 
     @OnLifecycleEvent(ON_RESUME)
     fun onPause() {
-        Timber.d("onPause")
         currentUpdateState.onPause()
     }
 
     @OnLifecycleEvent(ON_STOP)
     fun onStop() {
-        Timber.d("onStop")
         currentUpdateState.onStop()
     }
 
@@ -124,9 +119,9 @@ internal class AppUpdateLifecycleStateMachine(
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
     override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
-        Timber.d("Processing activity result: requestCode(%d), resultCode(%d)", requestCode, resultCode)
+        timber.d("Processing activity result: requestCode(%d), resultCode(%d)", requestCode, resultCode)
         return currentUpdateState.checkActivityResult(requestCode, resultCode).also {
-            Timber.d("Activity result handled: %b", it)
+            timber.d("Activity result handled: %b", it)
         }
     }
 
@@ -136,7 +131,6 @@ internal class AppUpdateLifecycleStateMachine(
      * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
      */
     override fun userCanceledUpdate() {
-        Timber.d("User cancels update")
         currentUpdateState.userCanceledUpdate()
     }
 
@@ -146,7 +140,6 @@ internal class AppUpdateLifecycleStateMachine(
      * Effective if update is called with [com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE]
      */
     override fun userConfirmedUpdate() {
-        Timber.d("User confirms update")
         currentUpdateState.userConfirmedUpdate()
     }
 
@@ -156,6 +149,6 @@ internal class AppUpdateLifecycleStateMachine(
     override fun cleanup() {
         lifecycle.removeObserver(this)
         currentUpdateState = None()
-        Timber.d("Cleaned-up!")
+        timber.d("Cleaned-up!")
     }
 }

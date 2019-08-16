@@ -16,18 +16,15 @@
 package com.motorro.appupdatewrapper
 
 import android.app.Activity
-import android.os.Looper
-import android.os.Looper.*
+import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Shadows
-import org.robolectric.Shadows.*
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals
 
@@ -40,6 +37,14 @@ class LogUtilsKtTest: TestAppTest() {
     fun init() {
         activity = mock()
         updateManager = spy(FakeAppUpdateManager(application))
+    }
+
+    @Test
+    fun createsLoggingTag() {
+        class Test: Tagged {
+            override fun getTagPrefix(): String = "Internal"
+        }
+        assertEquals("$LIBRARY_LOG_PREFIX:Internal:createsLoggingTag\$Test", Test().getTag())
     }
 
     @Test

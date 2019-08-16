@@ -15,13 +15,48 @@
 
 package com.motorro.appupdatewrapper
 
+import android.os.Build
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.InstallErrorCode
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import timber.log.Timber
 
+/**
+ * Trims tag to fit
+ */
+internal fun trimmedTag(tag: String): String = if (tag.length <= 23  || Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    tag
+} else {
+    tag.substring(0, 23)
+}
+
+/**
+ * Creates logging tag
+ */
+internal interface Tagged {
+    /**
+     * Returns common tag prefix
+     */
+    fun getTagPrefix(): String = ""
+
+    /**
+     * Returns logging tag
+     */
+    fun getTag(): String = trimmedTag("$LIBRARY_LOG_PREFIX:${getTagPrefix()}:${javaClass.simpleName}")
+}
+
+/**
+ * Sets [Timber.tag] and returns tree
+ */
+internal val Tagged.timber: Timber.Tree
+    get() = Timber.tag(getTag())
+
+/**
+ * AppUpdateInfo logging format
+ */
 private const val APP_UPDATE_INFO_FORMAT = """Update info: 
     - available version code: %d
     - update availability: %s
@@ -62,7 +97,7 @@ internal fun formatInstallStatus(status: Int): String = when(status) {
     InstallStatus.INSTALLED -> "INSTALLED"
     InstallStatus.FAILED -> "FAILED"
     InstallStatus.CANCELED -> "CANCELED"
-    else -> "UNKNOWN INSTALL STATUS: ${status}"
+    else -> "UNKNOWN INSTALL STATUS: $status"
 }
 
 /**
@@ -78,7 +113,7 @@ internal fun formatInstallErrorCode(code: Int): String = when(code) {
     InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED -> "ERROR_INSTALL_UNAVAILABLE"
     InstallErrorCode.ERROR_DOWNLOAD_NOT_PRESENT -> "ERROR_DOWNLOAD_NOT_PRESENT"
     InstallErrorCode.ERROR_INTERNAL_ERROR -> "ERROR_INTERNAL_ERROR"
-    else -> "UNKNOWN INSTALL ERROR: ${code}"
+    else -> "UNKNOWN INSTALL ERROR: $code"
 }
 
 /**

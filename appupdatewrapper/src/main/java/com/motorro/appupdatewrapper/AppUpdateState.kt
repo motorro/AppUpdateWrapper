@@ -18,12 +18,11 @@ package com.motorro.appupdatewrapper
 import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
 import com.google.android.play.core.appupdate.AppUpdateManager
-import timber.log.Timber
 
 /**
  * Application update state interface
  */
-internal abstract class AppUpdateState: AppUpdateWrapper {
+internal abstract class AppUpdateState: AppUpdateWrapper, Tagged {
     /**
      * Update stateMachine
      * @see AppUpdateStateMachine.setUpdateState
@@ -51,6 +50,7 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
         if(false != stateMachine.flowBreaker.isEnoughTimePassedSinceLatestCancel()) {
             block()
         } else {
+            timber.d("Update flow broken")
             complete()
         }
     }
@@ -102,34 +102,22 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
     /**
      * Handles lifecycle `onStart`
      */
-    @CallSuper
-    open fun onStart() {
-        Timber.d("onStart")
-    }
+    open fun onStart() = Unit
 
     /**
      * Handles lifecycle `onStop`
      */
-    @CallSuper
-    open fun onStop() {
-        Timber.d("onStop")
-    }
+    open fun onStop() = Unit
 
     /**
      * Handles lifecycle `onPause`
      */
-    @CallSuper
-    open fun onPause() {
-        Timber.d("onPause")
-    }
+    open fun onPause() = Unit
 
     /**
      * Handles lifecycle `onResume`
      */
-    @CallSuper
-    open fun onResume() {
-        Timber.d("onResume")
-    }
+    open fun onResume() = Unit
 
     /**
      * Checks activity result and returns `true` if result is an update result and was handled
@@ -155,9 +143,7 @@ internal abstract class AppUpdateState: AppUpdateWrapper {
      * Called by state-machine when state is being replaced
      */
     @CallSuper
-    override fun cleanup() {
-        Timber.d("cleanup")
-    }
+    override fun cleanup() = Unit
 }
 
 /**
@@ -168,12 +154,14 @@ internal class None: AppUpdateState()
 /**
  * Completes the update sequence
  */
-internal class Done: AppUpdateState() {
+internal class Done: AppUpdateState(), Tagged {
     /**
      * Handles lifecycle `onResume`
      */
     override fun onResume() {
         super.onResume()
+        timber.d("onResume")
+        timber.d("Completing...")
         withUpdateView {
             updateComplete()
             setNone()
@@ -191,7 +179,8 @@ internal class Error(@VisibleForTesting val error: AppUpdateException) : AppUpda
      */
     override fun onResume() {
         super.onResume()
-        Timber.w(error, "Application update failure: ")
+        timber.d("onResume")
+        timber.w(error, "Application update failure: ")
         ifNotBroken {
             withUpdateView {
                 nonCriticalUpdateError(error)
@@ -211,7 +200,8 @@ internal class Failed(@VisibleForTesting val error: AppUpdateException) : AppUpd
      */
     override fun onResume() {
         super.onResume()
-        Timber.w(error, "Application update failure: ")
+        timber.d("onResume")
+        timber.w(error, "Application update failure: ")
         withUpdateView {
             updateFailed(error)
             setNone()

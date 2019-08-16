@@ -18,6 +18,7 @@ package com.motorro.appupdatewrapper
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.play.core.appupdate.AppUpdateManager
+import timber.log.Timber
 
 /**
  * Starts flexible update
@@ -46,5 +47,6 @@ fun LifecycleOwner.startFlexibleUpdate(
     view: AppUpdateView,
     flowBreaker: UpdateFlowBreaker
 ): AppUpdateWrapper = AppUpdateLifecycleStateMachine(lifecycle, appUpdateManager, view, flowBreaker).also {
+    Timber.tag(trimmedTag("$LIBRARY_LOG_PREFIX:startImmediateUpdate")).d("Starting FLEXIBLE update flow...")
     FlexibleUpdateState.start(it)
 }

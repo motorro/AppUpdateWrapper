@@ -23,12 +23,11 @@ import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAI
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_NO_IMMEDIATE_UPDATE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
-import timber.log.Timber
 
 /**
  * Immediate update flow
  */
-internal sealed class ImmediateUpdateState: AppUpdateState() {
+internal sealed class ImmediateUpdateState: AppUpdateState(), Tagged {
     companion object {
         /**
          * Starts immediate update flow
@@ -69,6 +68,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
+            timber.d("onStart")
             checking()
         }
     }
@@ -88,20 +88,21 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onStart() {
             super.onStart()
+            timber.d("onStart")
+            timber.i("Getting application update info for IMMEDIATE update...")
             withUpdateView {
                 updateChecking()
             }
-            Timber.i("Getting application update info for IMMEDIATE update...")
             updateManager
                 .appUpdateInfo
                 .addOnSuccessListener {
-                    Timber.i("Application update info: %s", it.toLoggingString())
+                    timber.i("Application update info: %s", it.toLoggingString())
                     if (!stopped) {
                         processUpdateInfo(it)
                     }
                 }
                 .addOnFailureListener {
-                    Timber.w(it, "Error getting application update info: ")
+                    timber.w(it, "Error getting application update info: ")
                     if (!stopped) {
                         reportUpdateCheckFailure(it)
                     }
@@ -113,6 +114,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun cleanup() {
             super.cleanup()
+            timber.d("cleanup")
             stopped = true
         }
 
@@ -121,6 +123,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onStop() {
             super.onStop()
+            timber.d("onStop")
             complete()
         }
 
@@ -128,7 +131,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          * Transfers to failed state
          */
         private fun reportUpdateCheckFailure(appUpdateException: Throwable) {
-            Timber.d("Failing update due to update check...")
+            timber.d("Failing update due to update check...")
             fail(AppUpdateException(ERROR_UPDATE_FAILED, appUpdateException))
         }
 
@@ -136,7 +139,7 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          * Starts update on success or transfers to failed state
          */
         private fun processUpdateInfo(appUpdateInfo: AppUpdateInfo) {
-            Timber.d("Evaluating update info...")
+            timber.d("Evaluating update info...")
             when (appUpdateInfo.updateAvailability()) {
                 UPDATE_AVAILABLE, DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> update(appUpdateInfo)
                 else -> fail(AppUpdateException(ERROR_NO_IMMEDIATE_UPDATE))
@@ -154,15 +157,16 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          */
         override fun onResume() {
             super.onResume()
+            timber.d("onResume")
             if (false == updateInfo.isUpdateTypeAllowed(IMMEDIATE)) {
-                Timber.d("Update type IMMEDIATE is not allowed!")
+                timber.d("Update type IMMEDIATE is not allowed!")
                 fail(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))
             } else withUpdateView {
+                timber.d("Starting play-core update installer for IMMEDIATE state...")
                 // As consent activity starts current activity looses focus.
                 // So we need to transfer to the next state to break popup cycle.
                 updateUiCheck()
 
-                Timber.d("Starting play-core update installer for IMMEDIATE state...")
                 updateManager.startUpdateFlowForResult(
                     updateInfo,
                     IMMEDIATE,
@@ -183,15 +187,16 @@ internal sealed class ImmediateUpdateState: AppUpdateState() {
          * Use to check update activity result in [android.app.Activity.onActivityResult]
          */
         override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
+            timber.d("checkActivityResult: requestCode(%d), resultCode(%d)", requestCode, resultCode)
             if (REQUEST_CODE_UPDATE != requestCode) {
                 return false
             }
 
             if (Activity.RESULT_OK == resultCode) {
-                Timber.d("Update installation complete")
+                timber.d("Update installation complete")
                 complete()
             } else {
-                Timber.d("Failing update due to installation failure...")
+                timber.d("Failing update due to installation failure...")
                 fail(AppUpdateException(ERROR_UPDATE_FAILED))
             }
 
