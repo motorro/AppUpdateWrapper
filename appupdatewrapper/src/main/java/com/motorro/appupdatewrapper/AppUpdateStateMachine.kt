@@ -59,7 +59,7 @@ internal class AppUpdateLifecycleStateMachine(
     override val updateManager: AppUpdateManager,
     override val view: AppUpdateView,
     override val flowBreaker: UpdateFlowBreaker = UpdateFlowBreaker.alwaysOn()
-): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver {
+): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver, Tagged {
     /**
      * Current update state
      */
@@ -69,12 +69,14 @@ internal class AppUpdateLifecycleStateMachine(
     init {
         currentUpdateState = None()
         lifecycle.addObserver(this)
+        timber.d("State machine initialized")
     }
 
     /**
      * Sets new update state
      */
     override fun setUpdateState(newState: AppUpdateState) {
+        timber.d("Setting new state: %s", newState.javaClass.simpleName)
         currentUpdateState.cleanup()
 
         newState.stateMachine = this
@@ -82,9 +84,11 @@ internal class AppUpdateLifecycleStateMachine(
 
         with(lifecycle.currentState) {
             if (isAtLeast(Lifecycle.State.STARTED)) {
+                timber.d("Starting new state...")
                 newState.onStart()
             }
             if (isAtLeast(Lifecycle.State.RESUMED)) {
+                timber.d("Resuming new state...")
                 newState.onResume()
             }
         }
@@ -114,8 +118,12 @@ internal class AppUpdateLifecycleStateMachine(
      * Checks activity result and returns `true` if result is an update result and was handled
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
-    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean =
-        currentUpdateState.checkActivityResult(requestCode, resultCode)
+    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
+        timber.d("Processing activity result: requestCode(%d), resultCode(%d)", requestCode, resultCode)
+        return currentUpdateState.checkActivityResult(requestCode, resultCode).also {
+            timber.d("Activity result handled: %b", it)
+        }
+    }
 
     /**
      * Cancels update installation
@@ -141,5 +149,6 @@ internal class AppUpdateLifecycleStateMachine(
     override fun cleanup() {
         lifecycle.removeObserver(this)
         currentUpdateState = None()
+        timber.d("Cleaned-up!")
     }
 }

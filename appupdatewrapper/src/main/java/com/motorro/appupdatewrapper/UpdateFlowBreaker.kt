@@ -79,7 +79,7 @@ internal class IntervalBreaker(
     timeUnit: TimeUnit,
     private val storage: TimeCancelledStorage,
     private val clock: Clock = Clock.SYSTEM
-): UpdateFlowBreaker, TimeCancelledStorage by storage {
+): UpdateFlowBreaker, TimeCancelledStorage by storage, Tagged {
     /**
      * [isEnoughTimePassedSinceLatestCancel] will return `true` after this interval since latest cancel
      */
@@ -91,7 +91,14 @@ internal class IntervalBreaker(
     override fun isEnoughTimePassedSinceLatestCancel(): Boolean {
         val timeCancelled = storage.getTimeCanceled()
         val currentTime = clock.getMillis()
-        return currentTime - timeCancelled > intervalMillis
+        return (currentTime - timeCancelled > intervalMillis).also {
+            timber.d(
+                "Last time cancelled: %d, Current time: %d, Enough time passed: %s",
+                timeCancelled,
+                currentTime,
+                if(it) "yes" else "no"
+            )
+        }
     }
 }
 
@@ -121,8 +128,12 @@ interface TimeCancelledStorage {
 /**
  * Stores time cancelled in shared preferences
  * @param storage SharedPreferences instance
+ * @param clock Time provider
  */
-internal class WithPreferences(private val storage: SharedPreferences, private val clock: Clock = Clock.SYSTEM): TimeCancelledStorage {
+internal class WithPreferences(
+    private val storage: SharedPreferences,
+    private val clock: Clock = Clock.SYSTEM
+): TimeCancelledStorage, Tagged {
     /**
      * Gets the latest time user has explicitly cancelled update
      */
@@ -132,9 +143,11 @@ internal class WithPreferences(private val storage: SharedPreferences, private v
      * Saves current time as the latest one user has explicitly cancelled update
      */
     override fun saveTimeCanceled() {
+        val currentTime = clock.getMillis()
+        timber.d("Saving time cancelled: %d", currentTime)
         storage
             .edit()
-            .putLong(LATEST_CANCEL_PROPERTY, clock.getMillis())
+            .putLong(LATEST_CANCEL_PROPERTY, currentTime)
             .apply()
     }
 }

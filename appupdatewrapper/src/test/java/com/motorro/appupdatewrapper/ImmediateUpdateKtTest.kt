@@ -21,8 +21,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.install.model.AppUpdateType
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import timber.log.Timber
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

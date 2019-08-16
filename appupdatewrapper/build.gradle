@@ -76,6 +76,8 @@ dependencies {
     kapt 'androidx.lifecycle:lifecycle-compiler:2.2.0-alpha03'
     api 'com.google.android.play:core:1.6.1'
 
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     testImplementation project(":testapp")
     testImplementation 'androidx.test:core:1.2.1-alpha02'
     testImplementation 'androidx.test.ext:junit:1.1.2-alpha02'

@@ -18,7 +18,9 @@ package com.motorro.appupdatewrapper
 import android.app.Application
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import org.junit.BeforeClass
 import org.robolectric.annotation.Config
+import timber.log.Timber
 
 /**
  * Test class for robolectric with [TestApplication].
@@ -28,6 +30,17 @@ import org.robolectric.annotation.Config
         sdk = [Build.VERSION_CODES.P]
 )
 open class TestAppTest{
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun installTimber() {
+            // Just to test we don't crash in logging
+            if (0 == Timber.treeCount()) {
+                Timber.plant(Timber.DebugTree())
+            }
+        }
+    }
+
     /**
      * Application instance
      */

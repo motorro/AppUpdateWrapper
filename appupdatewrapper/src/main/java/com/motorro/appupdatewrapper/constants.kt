@@ -28,3 +28,7 @@ const val REQUEST_CODE_UPDATE = 1050
  */
 const val LATEST_CANCEL_PROPERTY = "latestTimeCancelled"
 
+/**
+ * Common log prefix
+ */
+internal const val LIBRARY_LOG_PREFIX = "AUW"
