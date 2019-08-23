@@ -27,7 +27,7 @@ import timber.log.Timber
  */
 @Config(
         application = TestApplication::class,
-        sdk = [Build.VERSION_CODES.Q]
+        sdk = [Build.VERSION_CODES.P]
 )
 open class TestAppTest{
     companion object {
