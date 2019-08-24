@@ -33,7 +33,7 @@ import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TY
 /**
  * Flexible update flow
  */
-internal sealed class FlexibleUpdateState(): AppUpdateState(), Tagged {
+internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
     companion object {
         /**
          * Starts flexible update flow
@@ -116,7 +116,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState(), Tagged {
     /**
      * Initial state
      */
-    internal class Initial() : FlexibleUpdateState() {
+    internal class Initial : FlexibleUpdateState() {
         /**
          * Handles lifecycle `onStart`
          */
@@ -130,7 +130,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState(), Tagged {
     /**
      * Checks for update
      */
-    internal class Checking(): FlexibleUpdateState() {
+    internal class Checking : FlexibleUpdateState() {
         /*
          * Set to true on [onStop] to prevent view interaction
          * as there is no way to abort task
@@ -279,7 +279,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState(), Tagged {
     /**
      * Watches for update download status
      */
-    internal class Downloading(): FlexibleUpdateState() {
+    internal class Downloading : FlexibleUpdateState() {
         /**
          * Update state listener
          */
@@ -342,7 +342,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState(), Tagged {
     /**
      * Instructs view to display update consent
      */
-    internal class InstallConsent(): FlexibleUpdateState() {
+    internal class InstallConsent : FlexibleUpdateState() {
         /**
          * Handles lifecycle `onResume`
          */
@@ -391,7 +391,7 @@ internal sealed class FlexibleUpdateState(): AppUpdateState(), Tagged {
     /**
      * Completes flexible update
      */
-    internal class CompleteUpdate(): FlexibleUpdateState() {
+    internal class CompleteUpdate : FlexibleUpdateState() {
         /*
          * Set to true on [onStop] to prevent view interaction
          * as there is no way to abort task
