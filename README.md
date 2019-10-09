@@ -350,7 +350,7 @@ Consider using a singleton instance injecting it to your flow instances from an 
 ### Use safe event handlers
 
 > Google has fixed the issue with event listeners in 'com.google.android.play:core:1.6.3'
-> If you use library 1.3.1 and above you don't need this fix
+> If you use library 1.3.3 and above you don't need this fix
 
 When using a singleton `AppUpdateMaanager` with multiple activities there is a problem with managing subscription to 
 update flow events. When several listeners are connected to a single manager and try to usnsubscribe in an event handler
