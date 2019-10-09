@@ -16,6 +16,7 @@
 package com.motorro.appupdatewrapper
 
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
@@ -126,13 +127,14 @@ private fun AppUpdateInfo.formatInstallStatus(): String = formatInstallStatus(in
 /**
  * Retrieves allowed update types
  */
-private fun AppUpdateInfo.formatUpdateTypesAllowed(): String {
-    var result = "NONE"
+@VisibleForTesting
+fun AppUpdateInfo.formatUpdateTypesAllowed(): String {
+    val result = mutableListOf<String>()
     if (isUpdateTypeAllowed(FLEXIBLE)) {
-        result = "FLEXIBLE"
+        result.add("FLEXIBLE")
     }
     if (isUpdateTypeAllowed(IMMEDIATE)) {
-        result += ", IMMEDIATE"
+        result.add("IMMEDIATE")
     }
-    return result
+    return result.takeIf { it.isNotEmpty() }?.joinToString() ?: "NONE"
 }
