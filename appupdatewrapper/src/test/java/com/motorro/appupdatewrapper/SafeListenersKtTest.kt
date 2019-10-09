@@ -71,11 +71,9 @@ class SafeListenersKtTest: TestAppTest() {
 
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
-    fun registeringWithinEventDispatchWillCrash() {
-        assertFailsWith<ConcurrentModificationException> {
-            buildTest {
-                registerListener { }
-            }
+    fun registeringWithinEventDispatchWillNotCrash() {
+        buildTest {
+            registerListener { }
         }
     }
 
@@ -89,11 +87,9 @@ class SafeListenersKtTest: TestAppTest() {
 
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
-    fun unregisteringWithinEventDispatchWillCrash() {
-        assertFailsWith<ConcurrentModificationException> {
-            buildTest {
-                unregisterListener(it)
-            }
+    fun unregisteringWithinEventDispatchWillNotCrash() {
+        buildTest {
+            unregisterListener(it)
         }
     }
 

@@ -21,6 +21,7 @@ import android.os.Handler
 import android.os.Looper.getMainLooper
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
+import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.tasks.OnFailureListener
 import com.google.android.play.core.tasks.OnSuccessListener
 import com.google.android.play.core.tasks.Task
@@ -37,14 +38,17 @@ const val APP_VERSION = 100500
  * @param immediateAvailable If true, immediate update is available
  * @param flexibleAvailable If true, flexible update is available
  */
-fun TestAppTest.createUpdateInfo(updateAvailability: Int, installStatus: Int, immediateAvailable: Boolean = true, flexibleAvailable: Boolean = true): AppUpdateInfo = AppUpdateInfo(
-    APP_PACKAGE,
-    APP_VERSION,
-    updateAvailability,
-    installStatus,
-    if (immediateAvailable) PendingIntent.getBroadcast(application, 0, Intent(), 0) else null,
-    if (flexibleAvailable) PendingIntent.getBroadcast(application, 0, Intent(), 0) else null
-)
+fun createUpdateInfo(updateAvailability: Int, installStatus: Int, immediateAvailable: Boolean = true, flexibleAvailable: Boolean = true): AppUpdateInfo  = object: AppUpdateInfo(){
+    override fun availableVersionCode(): Int = APP_VERSION
+    override fun updateAvailability(): Int = updateAvailability
+    override fun packageName(): String = APP_PACKAGE
+    override fun installStatus(): Int = installStatus
+    override fun isUpdateTypeAllowed(updateType: Int): Boolean = when(updateType) {
+        AppUpdateType.FLEXIBLE -> flexibleAvailable
+        AppUpdateType.IMMEDIATE -> immediateAvailable
+        else -> false
+    }
+}
 
 /**
  * A task that may [succeed] or [fail] on demand
