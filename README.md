@@ -1,8 +1,10 @@
 # AppUpdateWrapper [![Build Status](https://travis-ci.com/motorro/AppUpdateWrapper.svg?token=ZyJexBWWUzhwyHdkocKJ&branch=master)](https://travis-ci.com/motorro/AppUpdateWrapper) [ ![Download](https://api.bintray.com/packages/motorro/AppUpdateWrapper/appupdatewrapper/images/download.svg) ](https://bintray.com/motorro/AppUpdateWrapper/appupdatewrapper/_latestVersion)
 
 A wrapper for [Android AppUpdateManager](https://developer.android.com/reference/com/google/android/play/core/appupdate/AppUpdateManager) 
-to simplify in-app update flow.
+to simplify in-app update flow. 
+> Here is an [intoroduction article](https://proandroiddev.com/in-app-updates-for-android-made-easier-f57376ef7934) to this library describing problems I've come across when implementing in-app updates in a real-world Android application.
 
+## Contents
 <!-- toc -->
 
 - [Features](#features)
