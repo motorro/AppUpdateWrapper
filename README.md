@@ -345,6 +345,14 @@ download complete event and present an install consent. Most (hopefully) of thes
 and tested in a large multi-activity application. It seems however the original `AppUpdateManager` was written with 
 single-activity design in mind and several issues are to be solved.
 
+### Start update everywhere
+The library does not store any common update state between wrapper instances. The only state it uses
+is what google play-core provides. This is done intentionally as the update is downloaded without your
+control and there is no way to stay sync with it unless you are in a foreground (so-so). Thus in order 
+to catch-up with things going on, the wrapper should be started in any activity that may take part in 
+update process (interact with user concerning update). The update flow will be updated to correct
+state as long as the google-provided status allows to do it.
+
 ### AppUpdateManager instance
 Consider using a singleton instance injecting it to your flow instances from an application scope. Using several 
 `AppUpdateManager` instances simultaneously didn't work for me.
