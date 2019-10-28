@@ -29,6 +29,11 @@ import com.nhaarman.mockitokotlin2.spy
 import org.robolectric.annotation.LooperMode
 
 /**
+ * Detects Windows OS
+ */
+fun isRunningWindows() = true == System.getProperty("os.name")?.toLowerCase()?.contains("windows")
+
+/**
  * A task that may [succeed] or [fail] on demand
  */
 abstract class TestTask<T>: Task<T>() {
