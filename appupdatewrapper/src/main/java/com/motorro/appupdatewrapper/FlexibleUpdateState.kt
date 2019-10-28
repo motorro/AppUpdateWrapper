@@ -199,7 +199,6 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
             with(appUpdateInfo) {
                 when (updateAvailability()) {
                     DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> when (installStatus()) {
-                        REQUIRES_UI_INTENT -> updateConsent(appUpdateInfo)
                         PENDING, DOWNLOADING -> downloading()
                         DOWNLOADED -> installConsent()
                         INSTALLING -> completeUpdate()
@@ -305,6 +304,7 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
                         )
                     )
                 }
+                else -> timber.w("Unexpected install status: %s", formatInstallStatus(state.installStatus()))
             }
         }
 

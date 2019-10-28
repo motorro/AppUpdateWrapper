@@ -79,7 +79,6 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
     testImplementation project(":testapp")
-    testImplementation 'androidx.appcompat:appcompat:1.1.0'
     testImplementation 'androidx.test:core:1.2.1-alpha02'
     testImplementation 'androidx.test.ext:junit:1.1.2-alpha02'
     testImplementation 'junit:junit:4.13-rc-1'
