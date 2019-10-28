@@ -91,7 +91,6 @@ private fun AppUpdateInfo.formatUpdateAvailability(): String = when(updateAvaila
  */
 fun formatInstallStatus(status: Int): String = when(status) {
     InstallStatus.UNKNOWN -> "UNKNOWN"
-    InstallStatus.REQUIRES_UI_INTENT -> "REQUIRES_UI_INTENT"
     InstallStatus.PENDING -> "PENDING"
     InstallStatus.DOWNLOADING -> "DOWNLOADING"
     InstallStatus.DOWNLOADED -> "DOWNLOADED"

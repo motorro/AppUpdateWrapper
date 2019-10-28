@@ -18,8 +18,10 @@ package com.motorro.appupdatewrapper
 import android.app.Activity
 import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.model.ActivityResult
+import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -121,10 +123,10 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     fun checkingStateWillNotProceedIfStoppedBeforeTaskCompletes() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS,
-            InstallStatus.UNKNOWN
-        )
+        val updateInfo = mock<AppUpdateInfo> {
+            on { updateAvailability() } doReturn UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+            on { installStatus() } doReturn InstallStatus.UNKNOWN
+        }
         val testTask = createTestInfoTask()
         val testUpdateManager: AppUpdateManager = mock {
             on { this.appUpdateInfo } doReturn testTask
@@ -162,10 +164,11 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     fun updatingStateWillStartImmediateUpdateOnResume() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS,
-            InstallStatus.UNKNOWN
-        )
+        val updateInfo = mock<AppUpdateInfo> {
+            on { updateAvailability() } doReturn UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+            on { installStatus() } doReturn InstallStatus.UNKNOWN
+            on { isUpdateTypeAllowed(IMMEDIATE) } doReturn true
+        }
 
         val state = ImmediateUpdateState.Update(updateInfo).init()
         state.onResume()
@@ -177,11 +180,11 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     fun updatingStateWillSetFailedStateIfUpdateTypeNotSupported() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.UNKNOWN,
-            InstallStatus.UNKNOWN,
-            immediateAvailable = false
-        )
+        val updateInfo = mock<AppUpdateInfo> {
+            on { updateAvailability() } doReturn UpdateAvailability.UNKNOWN
+            on { installStatus() } doReturn InstallStatus.UNKNOWN
+            on { isUpdateTypeAllowed(IMMEDIATE) } doReturn false
+        }
 
         val state = ImmediateUpdateState.Update(updateInfo).init()
         state.onResume()
