@@ -18,6 +18,7 @@ package com.motorro.appupdatewrapper
 import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType
@@ -154,10 +155,10 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     fun checkingStateWillNotProceedIfStoppedBeforeTaskCompletes() {
-        val updateInfo = createUpdateInfo(
-            UpdateAvailability.UPDATE_AVAILABLE,
-            InstallStatus.UNKNOWN
-        )
+        val updateInfo = mock<AppUpdateInfo> {
+            on { updateAvailability() } doReturn UpdateAvailability.UPDATE_AVAILABLE
+            on { installStatus() } doReturn InstallStatus.UNKNOWN
+        }
         val testTask = createTestInfoTask()
         val testUpdateManager: AppUpdateManager = mock {
             on { this.appUpdateInfo } doReturn testTask
