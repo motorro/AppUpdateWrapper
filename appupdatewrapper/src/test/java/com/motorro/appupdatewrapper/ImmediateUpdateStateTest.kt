@@ -167,7 +167,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
         val updateInfo = mock<AppUpdateInfo> {
             on { updateAvailability() } doReturn UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
             on { installStatus() } doReturn InstallStatus.UNKNOWN
-            //on { isUpdateTypeAllowed(IMMEDIATE) } doReturn true
+            on { isUpdateTypeAllowed(IMMEDIATE) } doReturn true
         }
 
         val state = ImmediateUpdateState.Update(updateInfo).init()
