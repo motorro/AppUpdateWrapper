@@ -203,6 +203,11 @@ fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean
 `AppUpdateManager` launches some activities from time to time: to ask for update consent, to install, etc. It does so 
 on behalf of your calling activity. Thus you must implement `onActivityResult` at your side and pass data to this method.
 If `checkActivityResult` returns true - then the result was handled. See the sample at the [top](#basics) of the article.
+In case your activity already uses the [request code](appupdatewrapper/src/main/java/com/motorro/appupdatewrapper/constants.kt#L23) 
+used for application updates you can set a new one by setting a static var:
+```kotlin
+AppUpdateWrapper.REQUEST_CODE_UPDATE = 1111
+```
 
 #### userCanceledUpdate and userConfirmedUpdate
 ```kotlin

@@ -31,11 +31,15 @@ interface AppUpdateWrapper {
          * Originally, updating a list of subscribers within event dispatching crashes AppUpdateManager with concurrent
          * update exception. If your application uses several listeners simultaneously (like you have multiple activity
          * setup) or you encounter such an exception - set this value to true
-         * TODO: Remove the duct tape as soon as original library becomes friendly to multiple subscribers
          * @see AppUpdateManager.registerListener
          * @see AppUpdateManager.unregisterListener
          */
         var USE_SAFE_LISTENERS = false
+
+        /**
+         * The request code wrapper uses to run [AppUpdateManager.startUpdateFlowForResult]
+         */
+        var REQUEST_CODE_UPDATE = REQUEST_CODE_UPDATE_DEFAULT
     }
 
     /**
