@@ -72,15 +72,15 @@ dependencies {
 
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    api 'androidx.core:core:1.3.0-alpha01'
+    api 'androidx.core:core:1.3.0-alpha02'
     kapt 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
-    api 'com.google.android.play:core:1.6.5'
+    api 'com.google.android.play:core:1.7.0'
 
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
     testImplementation project(":testapp")
-    testImplementation 'androidx.test:core:1.3.0-alpha03'
-    testImplementation 'androidx.test.ext:junit:1.1.2-alpha03'
+    testImplementation 'androidx.test:core:1.3.0-alpha04'
+    testImplementation 'androidx.test.ext:junit:1.1.2-alpha04'
     testImplementation 'junit:junit:4.13'
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
