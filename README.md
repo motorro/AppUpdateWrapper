@@ -16,6 +16,7 @@ to simplify in-app update flow.
     + [updateReady (mandatory)](#updateready-mandatory)
     + [updateFailed (mandatory)](#updatefailed-mandatory)
     + [updateChecking (optional)](#updatechecking-optional)
+    + [updateDownloadStarts (optional)](#updateDownloadStarts-optional)
     + [updateInstallUiVisible (optional)](#updateinstalluivisible-optional)
     + [updateComplete (optional)](#updatecomplete-optional)
     + [nonCriticalUpdateError (optional)](#noncriticalupdateerror-optional)
@@ -147,7 +148,7 @@ will handle the `onActivityResult` and pass data to `AppUpdateWrapper.checkActiv
 ```kotlin
 fun updateReady()
 ```
-Called to report that update has been downloaded and ready to be installed. The UI may display some confirmation 
+Called in flexible flow to report that update has been downloaded and ready to be installed. The UI may display some confirmation 
 dialogue at this point. Depending on user's answer call `AppUpdateWrapper.userConfirmedUpdate` to install and restart or
 `AppUpdateWrapper.userCanceledUpdate` to postpone installation. The next time the user will be asked to update an app in
 a latter case is [configurable](#non-intrusive-flexible-updates-with-updateflowbreaker).
@@ -165,6 +166,13 @@ fun updateChecking()
 ```
 Called by presenter when update flow starts. UI may display a spinner of some kind.
 
+#### updateDownloadStarts (optional)
+```kotlin
+fun updateDownloadStarts()
+```
+Called by presenter user confirms flexible update and background download begins. 
+Called in flexible flow.
+
 #### updateInstallUiVisible (optional)
 ```kotlin
 fun updateInstallUiVisible()
@@ -177,6 +185,7 @@ may want to finish your main activity (or clear stack) at this point so user won
 fun updateComplete()
 ```
 Called when flow is finished. Either update not found, or cancelled, etc. Indicates a successful outcome.
+Called in flexible flow. Immediate flow either restarts (on success) or fails with [updateFailed](#updatefailed-mandatory).
 
 #### nonCriticalUpdateError (optional)
 ```kotlin
@@ -184,6 +193,7 @@ fun nonCriticalUpdateError(e: Throwable)
 ```
 Some error occurred during the update but it is considered non-critical within selected update flow. UI may toast or 
 notify the user in some other way.
+Called in flexible flow. Immediate flow is designed to be mandatory so it fails with critical [updateFailed](#updatefailed-mandatory).
 
 ### 3. Start your update flow
 The library supports both `IMMEDIATE` and `FLEXIBLE` update flows. 

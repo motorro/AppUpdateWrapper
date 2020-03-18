@@ -50,8 +50,15 @@ interface AppUpdateView {
     fun updateChecking() = Unit
 
     /**
+     * Called when user accepts update download in play-core dialog and download starts.
+     * Called in flexible flow
+     */
+    fun updateDownloadStarts() = Unit
+
+    /**
      * Reports update is downloaded and ready to be installed
      * When ready to proceed call [AppUpdateState.userConfirmedUpdate]
+     * Called in flexible flow
      * @see AppUpdateState.userConfirmedUpdate
      * @see AppUpdateState.userCanceledUpdate
      */
@@ -66,6 +73,7 @@ interface AppUpdateView {
 
     /**
      * No update available or update flow completed
+     * Called in flexible flow
      */
     fun updateComplete() = Unit
 
@@ -77,6 +85,7 @@ interface AppUpdateView {
     /**
      * Notify user of some non-critical update error e.g. flexible update has failed but it is not critical for
      * general application flow.
+     * Called in flexible flow
      */
     fun nonCriticalUpdateError(e: Throwable) = Unit
 }
