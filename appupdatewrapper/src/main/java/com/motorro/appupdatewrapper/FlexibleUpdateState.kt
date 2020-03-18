@@ -310,6 +310,17 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
         }
 
         /**
+         * Handles lifecycle `onStart`
+         */
+        override fun onStart() {
+            super.onStart()
+            timber.d("onStart")
+            withUpdateView {
+                updateDownloadStarts()
+            }
+        }
+
+        /**
          * Handles lifecycle `onResume`
          */
         override fun onResume() {

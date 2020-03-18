@@ -216,6 +216,15 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
 
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillUpdateUpdateViewWhenDownloadStarts() {
+        val state = FlexibleUpdateState.Downloading().init()
+        state.onStart()
+        shadowOf(getMainLooper()).idle()
+        verify(view).updateDownloadStarts()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun downloadingStateWillSubscribeEventsOnResume() {
         val state = FlexibleUpdateState.Downloading().init()
         state.onResume()
