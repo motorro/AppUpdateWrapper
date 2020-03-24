@@ -20,6 +20,7 @@ import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
@@ -169,6 +170,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
             on { updateAvailability() } doReturn UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
             on { installStatus() } doReturn InstallStatus.UNKNOWN
             on { isUpdateTypeAllowed(IMMEDIATE) } doReturn true
+            on { isUpdateTypeAllowed(AppUpdateOptions.defaultOptions(IMMEDIATE)) } doReturn true
         }
 
         val state = ImmediateUpdateState.Update(updateInfo).init()
@@ -185,6 +187,7 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
             on { updateAvailability() } doReturn UpdateAvailability.UNKNOWN
             on { installStatus() } doReturn InstallStatus.UNKNOWN
             on { isUpdateTypeAllowed(IMMEDIATE) } doReturn false
+            on { isUpdateTypeAllowed(AppUpdateOptions.defaultOptions(IMMEDIATE)) } doReturn false
         }
 
         val state = ImmediateUpdateState.Update(updateInfo).init()
