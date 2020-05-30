@@ -30,6 +30,7 @@ to simplify in-app update flow.
 - [Using library in multi-activity setup](#using-library-in-multi-activity-setup)
   * [AppUpdateManager instance](#appupdatemanager-instance)
   * [Use safe event handlers](#use-safe-event-handlers)
+  * [A possible implementation](#a-possible-implementation)
 - [Logging](#logging)
   * [Enabling logger](#enabling-logger)
   * [Logging rules](#logging-rules)
@@ -364,8 +365,8 @@ single-activity design in mind and several issues are to be solved.
 The library does not store any common update state between wrapper instances. The only state it uses
 is what google play-core provides. This is done intentionally as the update is downloaded without your
 control and there is no way to stay sync with it unless you are in a foreground (so-so). Thus in order 
-to catch-up with things going on, the wrapper should be started in any activity that may take part in 
-update process (interact with user concerning update). The update flow will be updated to correct
+to catch-up with things going on, the wrapper should be started **in any activity that may take part in 
+update process** (interact with user concerning update). The update flow will be updated to correct
 state as long as the google-provided status allows to do it.
 
 ### AppUpdateManager instance
@@ -392,6 +393,13 @@ class App: Application() {
     }
 }
 ```
+
+### A possible implementation
+You may want to implemented the `AppUpdateView` in your base activity (if you have any) injecting it 
+with a singleton `AppUpdateManager`.
+I will not put a complete listing here but you may take a look at the following gists for complete reference:
+* [Base activity setup](https://gist.github.com/motorro/ceeca40e9947ab1c142fe037c9613dbd)
+* [Dagger providers for update wrapper](https://gist.github.com/motorro/51587a5c652bad49a6220da17d7572fc)
 
 ## Logging
 Sometimes you'll want to see what is going on in the update flow. The library supports logging to 
