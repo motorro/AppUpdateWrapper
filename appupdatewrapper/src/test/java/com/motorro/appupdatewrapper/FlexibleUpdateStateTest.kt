@@ -21,7 +21,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.model.ActivityResult
-import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -86,7 +85,6 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun checkingStateWillSetUpdateConsentStateIfUpdateFound() {
         updateManager.setUpdateAvailable(100500)
-        updateManager.partiallyAllowedUpdateType = FLEXIBLE
         val state = FlexibleUpdateState.Checking().init()
         state.onStart()
         verify(stateMachine).setUpdateState(any<FlexibleUpdateState.UpdateConsent>())
@@ -353,24 +351,6 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
             state.onResume()
             assertFalse(isConfirmationDialogVisible)
             verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
-        }
-        shadowOf(getMainLooper()).idle()
-    }
-
-    @Test
-    @LooperMode(LooperMode.Mode.PAUSED)
-    fun updateConsentStateWillReportErrorIfUpdateIsNotCompatible() {
-        updateManager.setUpdateAvailable(100500)
-        updateManager.partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
-        updateManager.withInfo {
-            val state = FlexibleUpdateState.UpdateConsent(it).init()
-            state.onResume()
-            assertFalse(isConfirmationDialogVisible)
-            verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
-            verify(stateMachine).setUpdateState(check { newState -> 
-                val error = (newState as Error).error
-                assertEquals(AppUpdateException.ERROR_UPDATE_TYPE_NOT_ALLOWED, error.message)
-            })
         }
         shadowOf(getMainLooper()).idle()
     }

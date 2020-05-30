@@ -18,10 +18,7 @@ package com.motorro.appupdatewrapper
 import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import org.junit.Before
@@ -81,22 +78,10 @@ class LogUtilsKtTest: TestAppTest() {
 
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
-    fun formatsUpdateTypesAllowedWhenFlexibleAllowed() {
+    fun formatsUpdateTypesAllowedWhenUpdateIsAllowed() {
         updateManager.setUpdateAvailable(100500)
-        updateManager.partiallyAllowedUpdateType = AppUpdateType.FLEXIBLE
         updateManager.withInfo {
-            assertEquals("FLEXIBLE", it.formatUpdateTypesAllowed())
-        }
-        shadowOf(getMainLooper()).idle()
-    }
-
-    @Test
-    @LooperMode(LooperMode.Mode.PAUSED)
-    fun formatsUpdateTypesAllowedWhenImmediateAllowed() {
-        updateManager.setUpdateAvailable(100500)
-        updateManager.partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
-        updateManager.withInfo {
-            assertEquals("IMMEDIATE", it.formatUpdateTypesAllowed())
+            assertEquals("FLEXIBLE, IMMEDIATE", it.formatUpdateTypesAllowed())
         }
         shadowOf(getMainLooper()).idle()
     }

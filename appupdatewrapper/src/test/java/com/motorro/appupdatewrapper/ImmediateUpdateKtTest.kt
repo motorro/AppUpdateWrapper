@@ -19,13 +19,10 @@ import android.app.Activity
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.google.android.play.core.install.model.AppUpdateType
 import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
-import timber.log.Timber
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -38,7 +35,6 @@ class ImmediateUpdateKtTest: TestAppTest() {
         scenario.onActivity {
             updateManager = FakeAppUpdateManager(it).apply {
                 setUpdateAvailable(100500)
-                partiallyAllowedUpdateType = AppUpdateType.IMMEDIATE
             }
             it.updateWrapper = it.startImmediateUpdate(updateManager, it)
 

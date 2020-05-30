@@ -22,7 +22,6 @@ import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.ActivityResult
-import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -65,7 +64,6 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun checkingStateWillSetUpdateStateIfUpdateFound() {
         updateManager.setUpdateAvailable(100500)
-        updateManager.partiallyAllowedUpdateType = IMMEDIATE
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
         verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
