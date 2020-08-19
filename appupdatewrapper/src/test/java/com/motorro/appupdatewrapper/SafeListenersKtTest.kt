@@ -29,7 +29,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
-import kotlin.test.assertFailsWith
 
 /**
  * Originally, updating a list of subscribers within event dispatching crashes AppUpdateManager dispatcher
@@ -57,7 +56,7 @@ class SafeListenersKtTest: TestAppTest() {
 
             (1..2).map {
                 registerListener(object: InstallStateUpdatedListener {
-                    override fun onStateUpdate(p0: InstallState?) {
+                    override fun onStateUpdate(p0: InstallState) {
                         action(this)
                     }
                 })
@@ -79,6 +78,7 @@ class SafeListenersKtTest: TestAppTest() {
 
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
+    @Suppress("RedundantSamConstructor")
     fun safelyRegisteringWithinEventDispatchWillNotCrash() {
         buildTest {
             doRegisterListenerSafe(InstallStateUpdatedListener { })
