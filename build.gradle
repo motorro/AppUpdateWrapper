@@ -3,16 +3,17 @@ apply from: 'gradle/versioning.gradle'
 
 buildscript {
     ext.kotlin_version = '1.4.0'
-    ext.dokka_version = '0.9.18'
+    ext.dokka_version = '1.4.0'
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.2'
+        classpath 'com.android.tools.build:gradle:4.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'org.ajoberstar.grgit:grgit-gradle:3.0.0'
-        classpath 'com.novoda:bintray-release:0.9.2'
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
     }
 }
 
