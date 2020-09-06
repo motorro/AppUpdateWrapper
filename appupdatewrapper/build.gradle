@@ -2,17 +2,13 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.novoda.bintray-release'
-apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 buildscript {
     repositories {
         jcenter()
-    }
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:${dokka_version}"
     }
 }
 
@@ -72,27 +68,31 @@ dependencies {
 
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    api 'androidx.core:core:1.5.0-alpha01'
+    api 'androidx.core:core:1.5.0-alpha02'
     kapt 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
     api 'com.google.android.play:core:1.8.0'
 
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
     testImplementation project(":testapp")
-    testImplementation 'androidx.test:core:1.3.0-rc03'
-    testImplementation 'androidx.test.ext:junit:1.1.2-rc03'
+    testImplementation 'androidx.test:core:1.3.0'
+    testImplementation 'androidx.test.ext:junit:1.1.2'
     testImplementation 'junit:junit:4.13'
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
     testImplementation 'org.robolectric:robolectric:4.3.1'
 }
 
-dokka {
-    outputFormat = 'javadoc'
-    outputDirectory = "$buildDir/javadoc"
+dokkaJavadoc.configure {
+    outputDirectory.set(new File("$buildDir/javadoc"))
+    dokkaSourceSets {
+        named("main") {
+            noAndroidSdkLink.set(false)
+        }
+    }
 }
 
-task javadocJar(type: Jar, dependsOn: dokka) {
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
     archiveClassifier.set('javadoc')
     from "$buildDir/javadoc"
 }
@@ -106,14 +106,77 @@ artifacts {
     archives sourcesJar, javadocJar
 }
 
-publish {
-    userOrg = bintrayUserOrg
-    repoName = bintrayRepoName
-    groupId = rootProject.group
-    artifactId = 'appupdatewrapper'
-    publishVersion = rootProject.version
-    licences = ["Apache-2.0"]
-    desc = "A wrapper for Android `AppUpdateManager` to encapsulate update workflow."
-    website = "https://github.com/motorro/AppUpdateWrapper"
+def libId = 'appupdatewrapper'
+def libName = 'AppUpdateWrapper'
+def libDesc = 'A wrapper for Android `AppUpdateManager` to encapsulate update workflow.'
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id developerId
+            name developerName
+            email developerEmail
+        }
+    }
+
+    scm {
+        connection projectScm
+        developerConnection projectScm
+        url projectUrl
+    }
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                artifact sourcesJar
+                artifact javadocJar
+                groupId = rootProject.group
+                artifactId = libId
+                version = rootProject.version
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode('description', libDesc)
+                    root.appendNode('name', libName)
+                    root.appendNode('url', projectUrl)
+                    root.children().last() + pomConfig
+                }
+            }
+        }
+    }
+
+    bintrayUpload.dependsOn(assemble, generatePomFileForReleasePublication)
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['release']
+    publish = true
+    override = true
+    dryRun = project.hasProperty('dryRun') ? project.property('dryRun').toBoolean() : false
+    pkg {
+        userOrg = bintrayUserOrg
+        repo = bintrayRepoName
+        name = libName
+        desc = libDesc
+        licenses = ['Apache-2.0']
+        websiteUrl = projectUrl
+        vcsUrl = projectScm
+        publicDownloadNumbers = true
+        version {
+            name = rootProject.version
+            released = new Date()
+        }
+    }
+}
