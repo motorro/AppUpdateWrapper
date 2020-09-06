@@ -33,6 +33,9 @@ ext {
 
     bintrayUserOrg = "motorro"
     bintrayRepoName = "AppUpdateWrapper"
+
+    projectScm = 'https://github.com/motorro/AppUpdateWrapper.git'
+    projectUrl = 'https://github.com/motorro/AppUpdateWrapper'
 }
 
 setVersion(buildVersionName())
