@@ -107,7 +107,7 @@ artifacts {
 }
 
 def libId = 'appupdatewrapper'
-def libName = 'AppUpdateWrapper'
+def libName = 'appupdatewrapper'
 def libDesc = 'A wrapper for Android `AppUpdateManager` to encapsulate update workflow.'
 
 def pomConfig = {
