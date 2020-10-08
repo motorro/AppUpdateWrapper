@@ -16,6 +16,7 @@
 package com.motorro.appupdatewrapper
 
 import android.app.Activity
+import android.os.Looper.getMainLooper
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
@@ -23,12 +24,15 @@ import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDA
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 class ImmediateUpdateKtTest: TestAppTest() {
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun startsImmediateUpdateIfAvailable() {
         lateinit var updateManager: FakeAppUpdateManager
         val scenario = launch(TestUpdateActivity::class.java)
@@ -37,6 +41,7 @@ class ImmediateUpdateKtTest: TestAppTest() {
                 setUpdateAvailable(100500)
             }
             it.updateWrapper = it.startImmediateUpdate(updateManager, it)
+            shadowOf(getMainLooper()).idle()
 
             assertTrue(updateManager.isImmediateFlowVisible)
             // Emulate update success
@@ -47,6 +52,7 @@ class ImmediateUpdateKtTest: TestAppTest() {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun failsIfUpdateIsNotAvailable() {
         lateinit var updateManager: FakeAppUpdateManager
         val scenario = launch(TestUpdateActivity::class.java)
@@ -55,6 +61,7 @@ class ImmediateUpdateKtTest: TestAppTest() {
                 setUpdateNotAvailable()
             }
             it.startImmediateUpdate(updateManager, it)
+            shadowOf(getMainLooper()).idle()
         }
 
         assertEquals(TestUpdateActivity.RESULT_FAILURE, scenario.result.resultCode)

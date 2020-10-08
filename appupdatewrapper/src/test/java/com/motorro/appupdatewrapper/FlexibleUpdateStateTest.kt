@@ -83,10 +83,12 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun checkingStateWillSetUpdateConsentStateIfUpdateFound() {
         updateManager.setUpdateAvailable(100500)
         val state = FlexibleUpdateState.Checking().init()
         state.onStart()
+        shadowOf(getMainLooper()).idle()
         verify(stateMachine).setUpdateState(any<FlexibleUpdateState.UpdateConsent>())
     }
 

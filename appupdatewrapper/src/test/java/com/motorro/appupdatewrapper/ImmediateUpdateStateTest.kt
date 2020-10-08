@@ -16,7 +16,7 @@
 package com.motorro.appupdatewrapper
 
 import android.app.Activity
-import android.os.Looper
+import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -31,7 +31,7 @@ import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDA
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Shadows
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -62,10 +62,12 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun checkingStateWillSetUpdateStateIfUpdateFound() {
         updateManager.setUpdateAvailable(100500)
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
+        shadowOf(getMainLooper()).idle()
         verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
     }
 
@@ -80,10 +82,10 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
 
             val state = ImmediateUpdateState.Checking().init()
             state.onStart()
-            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            shadowOf(getMainLooper()).idle()
             verify(stateMachine).setUpdateState(check { assertTrue { it is ImmediateUpdateState.Update } })
         }
-        Shadows.shadowOf(Looper.getMainLooper()).idle()
+        shadowOf(getMainLooper()).idle()
     }
 
     @Test
@@ -108,11 +110,13 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     fun checkingStateWillSetFailedStateIfUpdateNotAvailable() {
         updateManager.setUpdateNotAvailable()
 
         val state = ImmediateUpdateState.Checking().init()
         state.onStart()
+        shadowOf(getMainLooper()).idle()
         argumentCaptor<AppUpdateState>().apply {
             verify(stateMachine).setUpdateState(capture())
             val newState = firstValue as Failed

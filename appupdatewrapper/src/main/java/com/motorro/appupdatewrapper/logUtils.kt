@@ -105,6 +105,7 @@ fun formatInstallStatus(status: Int): String = when(status) {
  * Returns a constant name for installation error
  * @param code Installation error code
  */
+@Suppress("DEPRECATION")
 fun formatInstallErrorCode(code: Int): String = when(code) {
     InstallErrorCode.NO_ERROR -> "NO_ERROR"
     InstallErrorCode.NO_ERROR_PARTIALLY_ALLOWED -> "NO_ERROR_PARTIALLY_ALLOWED"
@@ -116,6 +117,7 @@ fun formatInstallErrorCode(code: Int): String = when(code) {
     InstallErrorCode.ERROR_DOWNLOAD_NOT_PRESENT -> "ERROR_DOWNLOAD_NOT_PRESENT"
     InstallErrorCode.ERROR_APP_NOT_OWNED -> "ERROR_APP_NOT_OWNED"
     InstallErrorCode.ERROR_INTERNAL_ERROR -> "ERROR_INTERNAL_ERROR"
+    InstallErrorCode.ERROR_PLAY_STORE_NOT_FOUND -> "ERROR_PLAY_STORE_NOT_FOUND"
     else -> "UNKNOWN INSTALL ERROR: $code"
 }
 
