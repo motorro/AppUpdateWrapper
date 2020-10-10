@@ -16,6 +16,7 @@
 package com.motorro.appupdatewrapper
 
 import android.content.SharedPreferences
+import com.google.android.play.core.appupdate.AppUpdateInfo
 import java.util.concurrent.TimeUnit
 
 /**
@@ -26,6 +27,16 @@ interface UpdateFlowBreaker: TimeCancelledStorage {
      * Checks if enough time has passed since user had explicitly cancelled update
      */
     fun isEnoughTimePassedSinceLatestCancel(): Boolean
+
+    /**
+     * An extra point to check if update available is of any value to user
+     * For example you may implement extra logic on update priority level (set from play market) or
+     * staleness. Called _instead_ of [isEnoughTimePassedSinceLatestCancel] when processing
+     * available update so you may want to combine both time of last offer and update value at the
+     * same time.
+     * @param updateInfo
+     */
+    fun isUpdateValuable(updateInfo: AppUpdateInfo): Boolean
 
     companion object {
         /**
@@ -55,6 +66,16 @@ interface UpdateFlowBreaker: TimeCancelledStorage {
          */
         fun forOneDay(storage: SharedPreferences): UpdateFlowBreaker =
             withInterval(1L, TimeUnit.DAYS, TimeCancelledStorage.withPreferences(storage))
+
+        /**
+         * Wraps flow breaker with an update value check function [valueCheck] which is called
+         * when update info gets available. Combined with last update offer time you may decide
+         * if to ask again or even cancel the flexible flow and switch to immediate
+         * @receiver A flow breaker that checks the last time update UI was displayed
+         * @param valueCheck A function that is supplied with time check result and update info
+         */
+        fun UpdateFlowBreaker.withUpdateValueCheck(valueCheck: (Boolean, AppUpdateInfo) -> Boolean): UpdateFlowBreaker =
+            ValueCheckBreaker(this, valueCheck)
     }
 }
 
@@ -63,6 +84,7 @@ interface UpdateFlowBreaker: TimeCancelledStorage {
  */
 internal object AlwaysOn: UpdateFlowBreaker {
     override fun isEnoughTimePassedSinceLatestCancel(): Boolean = true
+    override fun isUpdateValuable(updateInfo: AppUpdateInfo): Boolean = true
     override fun getTimeCanceled(): Long = 0
     override fun saveTimeCanceled() = Unit
 }
@@ -100,6 +122,32 @@ internal class IntervalBreaker(
             )
         }
     }
+
+    /**
+     * This breaker processes last time the prompt was displayed only so we just delegate check
+     * to common method.
+     * @param updateInfo
+     */
+    override fun isUpdateValuable(updateInfo: AppUpdateInfo): Boolean = isEnoughTimePassedSinceLatestCancel()
+}
+
+/**
+ * Wraps around another [UpdateFlowBreaker] that checks for time intervals
+ * delegating value check to [valueCheck] block
+ * @param intervalBreaker Interval breaker who's [isEnoughTimePassedSinceLatestCancel] is called
+ * @param valueCheck Update value check function
+ */
+internal class ValueCheckBreaker(
+    private val intervalBreaker: UpdateFlowBreaker,
+    private val valueCheck: (Boolean, AppUpdateInfo) -> Boolean
+): UpdateFlowBreaker by intervalBreaker{
+    /**
+     * Gets time check from [intervalBreaker] and passes check result along with update info to
+     * [valueCheck]
+     * @param updateInfo
+     */
+    override fun isUpdateValuable(updateInfo: AppUpdateInfo): Boolean =
+        valueCheck(isEnoughTimePassedSinceLatestCancel(), updateInfo)
 }
 
 /**

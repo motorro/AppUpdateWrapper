@@ -15,14 +15,17 @@
 
 package com.motorro.appupdatewrapper
 
+import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
+import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows
+import org.robolectric.annotation.LooperMode
 import java.util.concurrent.TimeUnit
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -56,5 +59,51 @@ class UpdateFlowBreakerTest: TestAppTest() {
     fun prohibitsUiInteractionIfNotEnoughTimePassed() {
         whenever(clock.getMillis()).thenReturn(UNITS.toMillis(INTERVAL))
         assertFalse(intervalBreaker.isEnoughTimePassedSinceLatestCancel())
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun callsTimeCheckOnValueCheck() {
+        val updateManager = FakeAppUpdateManager(application)
+        whenever(clock.getMillis()).thenReturn(UNITS.toMillis(INTERVAL))
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            assertFalse(intervalBreaker.isUpdateValuable(it))
+        }
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun valueCheckBreakerDelegatesInfoCheck() {
+        val updateManager = FakeAppUpdateManager(application)
+        val delegate: UpdateFlowBreaker = mock {
+            on { this.isEnoughTimePassedSinceLatestCancel() } doReturn false
+            on { this.isUpdateValuable(any()) } doThrow UnsupportedOperationException("Should be overridden")
+        }
+        updateManager.withInfo { info ->
+            val updateChecker = ValueCheckBreaker(delegate) { fromDelegate, i ->
+                assertFalse(fromDelegate)
+                assertEquals(info, i)
+                return@ValueCheckBreaker true
+            }
+            assertTrue { updateChecker.isUpdateValuable(info) }
+            verify(delegate).isEnoughTimePassedSinceLatestCancel()
+            verify(delegate, never()).isUpdateValuable(any())
+        }
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    @Test
+    fun valueCheckBreakerDelegatesTimeCheck() {
+        val delegate: UpdateFlowBreaker = mock {
+            on { this.isEnoughTimePassedSinceLatestCancel() } doReturn false
+            on { this.isUpdateValuable(any()) } doThrow UnsupportedOperationException("Should be overridden")
+        }
+        val updateChecker = ValueCheckBreaker(delegate) { _, _ ->
+            throw UnsupportedOperationException("Not tested")
+        }
+        assertFalse(updateChecker.isEnoughTimePassedSinceLatestCancel())
+        verify(delegate).isEnoughTimePassedSinceLatestCancel()
     }
 }
