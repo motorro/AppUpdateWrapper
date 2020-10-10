@@ -16,7 +16,7 @@ to simplify in-app update flow.
     + [updateReady (mandatory)](#updateready-mandatory)
     + [updateFailed (mandatory)](#updatefailed-mandatory)
     + [updateChecking (optional)](#updatechecking-optional)
-    + [updateDownloadStarts (optional)](#updateDownloadStarts-optional)
+    + [updateDownloadStarts (optional)](#updatedownloadstarts-optional)
     + [updateInstallUiVisible (optional)](#updateinstalluivisible-optional)
     + [updateComplete (optional)](#updatecomplete-optional)
     + [nonCriticalUpdateError (optional)](#noncriticalupdateerror-optional)
@@ -317,6 +317,16 @@ interface UpdateFlowBreaker: TimeCancelledStorage {
      * Checks if enough time has passed since user had explicitly cancelled update
      */
     fun isEnoughTimePassedSinceLatestCancel(): Boolean
+
+    /**
+     * An extra point to check if update available is of any value to user
+     * For example you may implement extra logic on update priority level (set from play market) or
+     * staleness. Called _instead_ of [isEnoughTimePassedSinceLatestCancel] when processing
+     * available update so you may want to combine both time of last offer and update value at the
+     * same time.
+     * @param updateInfo
+     */
+    fun isUpdateValuable(updateInfo: AppUpdateInfo): Boolean
 }
 
 /**
@@ -352,7 +362,16 @@ Postpones update for one day
 fun forOneDay(storage: SharedPreferences): UpdateFlowBreaker
 ```
 Postpones update for one day storing cancellation time in shared preferences. 
-Take a look how to pass it to the workflow in a [basic example](#basics).
+```kotlin
+fun UpdateFlowBreaker.withUpdateValueCheck(valueCheck: (Boolean, AppUpdateInfo) -> Boolean): UpdateFlowBreaker
+```
+Extends the existing breaker with an update value check function [valueCheck] which is called
+when update info gets available. Update priority or staleness combined with last update offer time 
+will hel you to decide if to ask again or even cancel the flexible flow and switch to immediate flow.
+The function you pass will receive a time check result from your wrapped breaker and an update info
+from update manager.
+   
+Take a look how to pass the breaker to the workflow in a [basic example](#basics).
 
 ## Using library in multi-activity setup
 When the app is based on multiple activities it presents an extra challenge to implement a flexible update  due to 
