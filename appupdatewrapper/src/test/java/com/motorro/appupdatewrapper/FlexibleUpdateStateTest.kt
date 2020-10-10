@@ -334,11 +334,12 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @LooperMode(LooperMode.Mode.PAUSED)
     fun updateConsentStateWillAskForInstallConsentOnResume() {
         updateManager.setUpdateAvailable(100500)
-        updateManager.withInfo {
-            val state = FlexibleUpdateState.UpdateConsent(it).init()
+        updateManager.withInfo { info ->
+            val state = FlexibleUpdateState.UpdateConsent(info).init()
             state.onResume()
             assertTrue(isConfirmationDialogVisible)
             verify(stateMachine).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
+            verify(breaker).isUpdateValuable(info)
         }
         shadowOf(getMainLooper()).idle()
     }
@@ -347,12 +348,13 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @LooperMode(LooperMode.Mode.PAUSED)
     fun updateConsentStateWillNotAskForInstallConsentIfBroken() {
         updateManager.setUpdateAvailable(100500)
-        updateManager.withInfo {
-            whenever(breaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
-            val state = FlexibleUpdateState.UpdateConsent(it).init()
+        updateManager.withInfo { info ->
+            whenever(breaker.isUpdateValuable(any())).thenReturn(false)
+            val state = FlexibleUpdateState.UpdateConsent(info).init()
             state.onResume()
             assertFalse(isConfirmationDialogVisible)
             verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.UpdateConsentCheck>())
+            verify(breaker).isUpdateValuable(info)
         }
         shadowOf(getMainLooper()).idle()
     }

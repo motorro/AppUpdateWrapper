@@ -22,10 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +41,7 @@ class FlexibleUpdateKtTest: TestAppTest() {
     fun init() {
         flowBreaker = mock {
             on { isEnoughTimePassedSinceLatestCancel() } doReturn true
+            on { isUpdateValuable(any()) } doReturn true
         }
     }
 

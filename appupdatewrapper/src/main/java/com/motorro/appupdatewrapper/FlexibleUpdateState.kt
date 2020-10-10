@@ -224,7 +224,7 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
         override fun onResume() {
             super.onResume()
             timber.d("onResume")
-            ifNotBroken {
+            ifNotBroken(updateInfo) {
                 if (false == updateInfo.isUpdateTypeAllowed(FLEXIBLE)) {
                     timber.d("Update type FLEXIBLE is not allowed!")
                     reportError(AppUpdateException(ERROR_UPDATE_TYPE_NOT_ALLOWED))

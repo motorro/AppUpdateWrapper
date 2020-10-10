@@ -17,6 +17,7 @@ package com.motorro.appupdatewrapper
 
 import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
+import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 
 /**
@@ -40,6 +41,20 @@ internal abstract class AppUpdateState: AppUpdateWrapper, Tagged {
      */
     protected fun withUpdateView(block: AppUpdateView.() -> Unit) {
         stateMachine.view.block()
+    }
+
+    /**
+     * Executes [block] if update flow is not broken by [AppUpdateStateMachine.flowBreaker] update
+     * value check.
+     * Otherwise transfers to [Done]
+     */
+    protected fun ifNotBroken(updateInfo: AppUpdateInfo, block: () -> Unit) {
+        if(false != stateMachine.flowBreaker.isUpdateValuable(updateInfo)) {
+            block()
+        } else {
+            timber.d("Update flow broken")
+            complete()
+        }
     }
 
     /**

@@ -17,6 +17,7 @@ package com.motorro.appupdatewrapper
 
 import android.app.Activity
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
@@ -38,6 +39,7 @@ internal abstract class BaseAppUpdateStateTest: TestAppTest() {
         updateManager = spy(FakeAppUpdateManager(application))
         breaker = mock {
             on { isEnoughTimePassedSinceLatestCancel() } doReturn true
+            on { isUpdateValuable(any()) } doReturn true
         }
         stateMachine = mock {
             on { view } doReturn view
