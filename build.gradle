@@ -2,14 +2,14 @@ apply plugin: 'org.ajoberstar.grgit'
 apply from: 'gradle/versioning.gradle'
 
 buildscript {
-    ext.kotlin_version = '1.4.10'
+    ext.kotlin_version = '1.4.20'
     ext.dokka_version = '1.4.0'
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:4.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'org.ajoberstar.grgit:grgit-gradle:3.0.0'
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
