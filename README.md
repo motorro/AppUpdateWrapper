@@ -1,4 +1,4 @@
-# AppUpdateWrapper [![Build Status](https://travis-ci.com/motorro/AppUpdateWrapper.svg?token=ZyJexBWWUzhwyHdkocKJ&branch=master)](https://travis-ci.com/motorro/AppUpdateWrapper) [ ![Download](https://api.bintray.com/packages/motorro/AppUpdateWrapper/appupdatewrapper/images/download.svg) ](https://bintray.com/motorro/AppUpdateWrapper/appupdatewrapper/_latestVersion)
+# AppUpdateWrapper [![Build Status](https://travis-ci.com/motorro/AppUpdateWrapper.svg?token=ZyJexBWWUzhwyHdkocKJ&branch=master)](https://travis-ci.com/motorro/AppUpdateWrapper) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.motorro.appupdatewrapper/appupdatewrapper/badge.png)](https://repo1.maven.org/maven2/com/motorro/appupdatewrapper/appupdatewrapper/)
 
 A wrapper for [Android AppUpdateManager](https://developer.android.com/reference/com/google/android/play/core/appupdate/AppUpdateManager) 
 to simplify in-app update flow. 
