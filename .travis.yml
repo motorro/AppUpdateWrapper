@@ -50,7 +50,7 @@ jobs:
       script: skip
       deploy:
         provider: script
-        script: "./gradlew bintrayUpload -PbintrayUser=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PdryRun=false --no-daemon"
+        script: "./gradlew publishReleasePublicationToSonatypeRepository --max-workers 1 closeAndReleaseRepository --no-daemon"
         skip_cleanup: true
         verbose: true
         on:

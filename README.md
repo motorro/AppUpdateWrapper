@@ -127,6 +127,10 @@ required for multi-activity applications only.
 
 ### 1. Setting up the dependency
 ```groovy
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation 'com.motorro.appupdatewrapper:appupdatewrapper:x.x.x@aar'
 }

@@ -1,19 +1,30 @@
 apply plugin: 'org.ajoberstar.grgit'
 apply from: 'gradle/versioning.gradle'
+apply plugin: 'io.codearte.nexus-staging'
 
 buildscript {
     ext.kotlin_version = '1.4.30'
     ext.dokka_version = '1.4.0'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        maven {
+            name = 'ajoberstar-backup'
+            url = 'https://ajoberstar.github.io/bintray-backup/'
+        }
+        maven {
+            url="https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url="https://dl.bintray.com/kotlin/dokka"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'org.ajoberstar.grgit:grgit-gradle:3.0.0'
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0'
     }
 }
 
@@ -41,7 +52,10 @@ group = "com.motorro.appupdatewrapper"
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        maven {
+            url="https://plugins.gradle.org/m2/"
+        }
     }
 }
 

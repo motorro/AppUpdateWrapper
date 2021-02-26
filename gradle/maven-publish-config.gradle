@@ -1,3 +1,5 @@
+// Based on this article: https://getstream.io/blog/publishing-libraries-to-mavencentral-2021/
+
 File secretPropsFile = project.rootProject.file('local.properties')
 if (secretPropsFile.exists()) {
     Properties lp = new Properties()

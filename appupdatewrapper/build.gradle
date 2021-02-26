@@ -9,7 +9,7 @@ apply plugin: 'signing'
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -186,4 +186,11 @@ afterEvaluate {
     signing {
         sign publishing.publications
     }
+}
+
+nexusStaging {
+    packageGroup = rootProject.group
+    stagingProfileId = sonatypeStagingProfileId
+    username = ossrhUsername
+    password = ossrhPassword
 }
