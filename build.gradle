@@ -31,9 +31,6 @@ ext {
     developerName = 'Nikolai Kotchetkov'
     developerEmail = 'motorro@gmail.com'
 
-    bintrayUserOrg = "motorro"
-    bintrayRepoName = "AppUpdateWrapper"
-
     projectScm = 'https://github.com/motorro/AppUpdateWrapper.git'
     projectUrl = 'https://github.com/motorro/AppUpdateWrapper'
 }

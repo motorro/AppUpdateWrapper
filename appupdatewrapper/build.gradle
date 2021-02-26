@@ -4,7 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
+apply from: "${rootProject.projectDir}/gradle/maven-publish-config.gradle"
+apply plugin: 'signing'
 
 buildscript {
     repositories {
@@ -144,39 +145,45 @@ afterEvaluate {
                 groupId = rootProject.group
                 artifactId = libId
                 version = rootProject.version
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', libDesc)
-                    root.appendNode('name', libName)
-                    root.appendNode('url', projectUrl)
-                    root.children().last() + pomConfig
+
+                pom {
+                    name = libName
+                    description = libDesc
+                    url = projectUrl
+                    licenses {
+                        license {
+                            name = 'Apache-2.0'
+                            url = 'https://apache.org/licenses/LICENSE-2.0'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = developerId
+                            name = developerName
+                            email = developerEmail
+                        }
+                    }
+                    scm {
+                        connection = projectScm
+                        developerConnection = projectScm
+                        url = projectUrl
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "sonatype"
+                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
                 }
             }
         }
     }
 
-    bintrayUpload.dependsOn(assemble, generatePomFileForReleasePublication)
-}
-
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_API_KEY')
-    publications = ['release']
-    publish = true
-    override = true
-    dryRun = project.hasProperty('dryRun') ? project.property('dryRun').toBoolean() : false
-    pkg {
-        userOrg = bintrayUserOrg
-        repo = bintrayRepoName
-        name = libName
-        desc = libDesc
-        licenses = ['Apache-2.0']
-        websiteUrl = projectUrl
-        vcsUrl = projectScm
-        publicDownloadNumbers = true
-        version {
-            name = rootProject.version
-            released = new Date()
-        }
+    signing {
+        sign publishing.publications
     }
 }
