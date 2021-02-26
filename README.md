@@ -4,6 +4,7 @@ A wrapper for [Android AppUpdateManager](https://developer.android.com/reference
 to simplify in-app update flow. 
 > Here is an [intoroduction article](https://proandroiddev.com/in-app-updates-for-android-made-easier-f57376ef7934) to this library describing problems I've come across when implementing in-app updates in a real-world Android application.
 
+
 ## Contents
 <!-- toc -->
 
