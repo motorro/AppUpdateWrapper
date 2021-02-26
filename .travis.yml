@@ -48,7 +48,7 @@ jobs:
       script: "./gradlew displayVersion check --no-daemon"
     - stage: deploy
       script:
-        "echo '$SIGNING_SECRET_FILE_CONTENTS' | base64 -d > '$SIGNING_SECRET_KEY_RING_FILE'"
+        "echo $SIGNING_SECRET_FILE_CONTENTS | base64 -d > $SIGNING_SECRET_KEY_RING_FILE"
       deploy:
         provider: script
         script: "./gradlew publishReleasePublicationToSonatypeRepository --max-workers 1 --no-daemon"
