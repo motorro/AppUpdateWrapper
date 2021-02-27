@@ -161,6 +161,7 @@ afterEvaluate {
     }
 
     signing {
+        useGpgCmd()
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign publishing.publications
     }
