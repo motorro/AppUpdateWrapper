@@ -4,7 +4,6 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
-apply from: "${rootProject.projectDir}/gradle/maven-publish-config.gradle"
 apply plugin: 'signing'
 
 buildscript {
@@ -69,7 +68,7 @@ dependencies {
 
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    api 'androidx.core:core-ktx:1.5.0-beta01'
+    api 'androidx.core:core-ktx:1.5.0-beta02'
     kapt 'androidx.lifecycle:lifecycle-common-java8:2.3.0'
     api 'com.google.android.play:core:1.9.1'
 
@@ -164,11 +163,4 @@ afterEvaluate {
         useInMemoryPgpKeys(signingKey, signingPassword)
         sign publishing.publications
     }
-}
-
-nexusStaging {
-    packageGroup = rootProject.group
-    stagingProfileId = sonatypeStagingProfileId
-    username = ossrhUsername
-    password = ossrhPassword
 }

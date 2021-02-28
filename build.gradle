@@ -1,6 +1,7 @@
 apply plugin: 'org.ajoberstar.grgit'
 apply from: 'gradle/versioning.gradle'
-apply plugin: 'io.codearte.nexus-staging'
+apply from: 'gradle/maven-publish-config.gradle'
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
 buildscript {
     ext.kotlin_version = '1.4.30'
@@ -24,7 +25,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'org.ajoberstar.grgit:grgit-gradle:3.0.0'
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0'
+        classpath "io.github.gradle-nexus:publish-plugin:1.0.0"
     }
 }
 
@@ -69,3 +70,15 @@ task displayVersion(type: Task, group: 'documentation') {
         println("Project version: ${project.version}")
     }
 }
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = ossrhUsername
+            password = ossrhPassword
+        }
+    }
+}
+
