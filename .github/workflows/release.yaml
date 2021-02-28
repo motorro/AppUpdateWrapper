@@ -1,8 +1,6 @@
 name: Release
 
-on:
-  release:
-    types: [released]
+on: workflow_dispatch
 
 jobs:
   publish:
