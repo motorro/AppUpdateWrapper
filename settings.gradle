@@ -1,1 +1,2 @@
 include ':appupdatewrapper', ':testapp'
+include ':sample'
