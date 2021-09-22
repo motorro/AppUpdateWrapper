@@ -35,7 +35,7 @@ open class TestAppTest{
         @JvmStatic
         fun installTimber() {
             // Just to test we don't crash in logging
-            if (0 == Timber.treeCount()) {
+            if (0 == Timber.treeCount) {
                 Timber.plant(Timber.DebugTree())
             }
         }

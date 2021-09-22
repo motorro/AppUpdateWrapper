@@ -44,7 +44,7 @@ class LogUtilsKtTest: TestAppTest() {
         class Test: Tagged {
             override fun getTagPrefix(): String = "Internal"
         }
-        assertEquals("$LIBRARY_LOG_PREFIX:Internal:createsLoggingTag\$Test", Test().getTag())
+        assertEquals("$LIBRARY_LOG_PREFIX:Internal:Test", Test().getTag())
     }
 
     @Test
