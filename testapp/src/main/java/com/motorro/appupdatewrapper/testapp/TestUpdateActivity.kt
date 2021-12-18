@@ -34,11 +34,13 @@ class TestUpdateActivity : AppCompatActivity(), AppUpdateView {
 
     // To pass 'activity result' as fake update manager does not start activities
     fun passActivityResult(requestCode: Int, resultCode: Int) {
+        @Suppress("DEPRECATION")
         onActivityResult(requestCode, resultCode, null)
     }
 
     // Passes an activity result to wrapper to check for play-core interaction
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
         if (updateWrapper.checkActivityResult(requestCode, resultCode)) {
             // Result handled and processed

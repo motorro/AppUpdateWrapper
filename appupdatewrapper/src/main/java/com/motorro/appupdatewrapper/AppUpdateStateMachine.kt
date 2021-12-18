@@ -16,10 +16,9 @@
 package com.motorro.appupdatewrapper
 
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Lifecycle.Event.*
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.play.core.appupdate.AppUpdateManager
 
 /**
@@ -59,7 +58,7 @@ internal class AppUpdateLifecycleStateMachine(
     override val updateManager: AppUpdateManager,
     override val view: AppUpdateView,
     override val flowBreaker: UpdateFlowBreaker = UpdateFlowBreaker.alwaysOn()
-): AppUpdateStateMachine, AppUpdateWrapper, LifecycleObserver, Tagged {
+): AppUpdateStateMachine, AppUpdateWrapper, DefaultLifecycleObserver, Tagged {
     /**
      * Current update state
      */
@@ -94,23 +93,19 @@ internal class AppUpdateLifecycleStateMachine(
         }
     }
 
-    @OnLifecycleEvent(ON_START)
-    fun onStart() {
+    override fun onStart(owner: LifecycleOwner) {
         currentUpdateState.onStart()
     }
 
-    @OnLifecycleEvent(ON_RESUME)
-    fun onResume() {
+    override fun onResume(owner: LifecycleOwner) {
         currentUpdateState.onResume()
     }
 
-    @OnLifecycleEvent(ON_RESUME)
-    fun onPause() {
+    override fun onPause(owner: LifecycleOwner) {
         currentUpdateState.onPause()
     }
 
-    @OnLifecycleEvent(ON_STOP)
-    fun onStop() {
+    override fun onStop(owner: LifecycleOwner) {
         currentUpdateState.onStop()
     }
 

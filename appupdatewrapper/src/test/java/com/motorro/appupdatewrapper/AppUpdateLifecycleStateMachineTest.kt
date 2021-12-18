@@ -16,9 +16,13 @@
 package com.motorro.appupdatewrapper
 
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Lifecycle.State.*
+import androidx.lifecycle.Lifecycle.State.INITIALIZED
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.verify
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,16 +31,14 @@ import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 class AppUpdateLifecycleStateMachineTest: TestAppTest() {
-    private lateinit var lifecycle: Lifecycle
+    private lateinit var lifecycleOwner: TestLifecycleOwner
     private lateinit var stateMachine: AppUpdateLifecycleStateMachine
     private lateinit var state: AppUpdateState
 
     @Before
     fun init() {
-        lifecycle = mock {
-            on { currentState } doReturn DESTROYED
-        }
-        stateMachine = AppUpdateLifecycleStateMachine(lifecycle, mock(), mock(), mock())
+        lifecycleOwner = TestLifecycleOwner(INITIALIZED)
+        stateMachine = AppUpdateLifecycleStateMachine(lifecycleOwner.lifecycle, mock(), mock(), mock())
 
         state = spy()
     }
@@ -46,7 +48,7 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
         stateMachine.setUpdateState(state)
         assertEquals(stateMachine, state.stateMachine)
 
-        stateMachine.onStart()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
         verify(state).onStart()
     }
 
@@ -65,24 +67,22 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
     }
 
     @Test
-    fun callsStateOnStartIfLifecycleStarted() {
-        whenever(lifecycle.currentState).thenReturn(STARTED)
+    fun followsLifecycle() {
         stateMachine.setUpdateState(state)
-        verify(state).onStart()
-        verify(state, never()).onResume()
-    }
 
-    @Test
-    fun callsStateOnStartAndOnResumedIfLifecycleResumed() {
-        whenever(lifecycle.currentState).thenReturn(RESUMED)
-        stateMachine.setUpdateState(state)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
         verify(state).onStart()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         verify(state).onResume()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        verify(state).onPause()
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        verify(state).onStop()
     }
 
     @Test
     fun initializes() {
-        verify(lifecycle).addObserver(stateMachine)
+        assertEquals(1, lifecycleOwner.observerCount)
         assertTrue { stateMachine.currentUpdateState is None}
     }
 
@@ -90,7 +90,7 @@ class AppUpdateLifecycleStateMachineTest: TestAppTest() {
     fun cleansUp() {
         stateMachine.setUpdateState(state)
         stateMachine.cleanup()
-        verify(lifecycle).removeObserver(stateMachine)
-        assertTrue { stateMachine.currentUpdateState is None}
+        assertEquals(0, lifecycleOwner.observerCount)
+        assertTrue { stateMachine.currentUpdateState is None }
     }
 }
