@@ -188,7 +188,7 @@ internal class Done: AppUpdateState(), Tagged {
  * Reports non-critical update error.
  * Ends-up in [AppUpdateView.updateComplete] calling [AppUpdateView.nonCriticalUpdateError]
  */
-internal class Error(@VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
+internal class Error(@get:VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
     /**
      * Handles lifecycle `onResume`
      */
@@ -209,7 +209,7 @@ internal class Error(@VisibleForTesting val error: AppUpdateException) : AppUpda
  * Reports critical update error.
  * Ends-up in [AppUpdateView.updateFailed]
  */
-internal class Failed(@VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
+internal class Failed(@get:VisibleForTesting val error: AppUpdateException) : AppUpdateState() {
     /**
      * Handles lifecycle `onResume`
      */

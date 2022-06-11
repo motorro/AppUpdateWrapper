@@ -4,7 +4,7 @@ apply from: 'gradle/maven-publish-config.gradle'
 apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
 buildscript {
-    ext.kotlin_version = '1.6.10'
+    ext.kotlin_version = '1.7.0'
     ext.dokka_version = '1.6.0'
     repositories {
         google()
@@ -21,7 +21,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"

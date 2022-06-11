@@ -51,6 +51,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'com.motorro.appupdatewrapper'
 }
 
 dependencies {
@@ -58,9 +59,9 @@ dependencies {
 
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-    api 'androidx.core:core-ktx:1.7.0'
-    api 'androidx.lifecycle:lifecycle-common:2.4.0'
-    api 'com.google.android.play:core:1.10.2'
+    api 'androidx.core:core-ktx:1.8.0'
+    api 'androidx.lifecycle:lifecycle-common:2.4.1'
+    api 'com.google.android.play:core:1.10.3'
 
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
@@ -70,8 +71,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
-    testImplementation 'org.robolectric:robolectric:4.7.3'
-    testImplementation 'androidx.lifecycle:lifecycle-runtime-testing:2.4.0'
+    testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation 'androidx.lifecycle:lifecycle-runtime-testing:2.4.1'
 }
 
 dokkaJavadoc.configure {
