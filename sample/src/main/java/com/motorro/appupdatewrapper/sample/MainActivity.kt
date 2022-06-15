@@ -1,6 +1,7 @@
 package com.motorro.appupdatewrapper.sample
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
@@ -8,6 +9,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.motorro.appupdatewrapper.AppUpdateView
 import com.motorro.appupdatewrapper.AppUpdateWrapper
 import com.motorro.appupdatewrapper.UpdateFlowBreaker
+import com.motorro.appupdatewrapper.UpdateFlowBreaker.Companion.withUpdateValueCheck
 import com.motorro.appupdatewrapper.sample.databinding.ActivityMainBinding
 import com.motorro.appupdatewrapper.startFlexibleUpdate
 
@@ -26,11 +28,24 @@ class MainActivity : AppCompatActivity(), AppUpdateView {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val updateLaunchState = applicationContext.getSharedPreferences(
+            "update",
+            Context.MODE_PRIVATE
+        )
         // Starts flexible update flow
         updateWrapper = startFlexibleUpdate(
-            AppUpdateManagerFactory.create(this.applicationContext),
-            this,
-            UpdateFlowBreaker.alwaysOn()
+            appUpdateManager = AppUpdateManagerFactory.create(this.applicationContext),
+            view = this,
+            // Setup update to notify users if either:
+            // 1. If update is marked is valuable at Google Play
+            // 2. A day passed since last notification
+            flowBreaker = UpdateFlowBreaker.forOneDay(updateLaunchState).withUpdateValueCheck { timePassed, info ->
+                // Check if either:
+                // - update is of high priority (0-5)
+                //   see: https://developer.android.com/guide/playcore/in-app-updates/kotlin-java#update-priority
+                // - from previous breaker in chain (one day passed)
+                5 == info.updatePriority() || timePassed
+            }
         )
     }
 
