@@ -17,7 +17,7 @@ package com.motorro.appupdatewrapper
 
 import android.app.Activity
 import android.os.Looper.getMainLooper
-import androidx.test.core.app.ActivityScenario.launch
+import androidx.test.core.app.ActivityScenario.launchActivityForResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
@@ -49,7 +49,7 @@ class FlexibleUpdateKtTest: TestAppTest() {
     @LooperMode(LooperMode.Mode.PAUSED)
     fun startsFlexibleUpdateIfAvailable() {
         lateinit var updateManager: FakeAppUpdateManager
-        val scenario = launch(TestUpdateActivity::class.java)
+        val scenario = launchActivityForResult(TestUpdateActivity::class.java)
         scenario.onActivity {
             updateManager = FakeAppUpdateManager(it).apply {
                 setUpdateAvailable(100500)
@@ -77,7 +77,7 @@ class FlexibleUpdateKtTest: TestAppTest() {
     @LooperMode(LooperMode.Mode.PAUSED)
     fun cancelsUpdateOnUserReject() {
         lateinit var updateManager: FakeAppUpdateManager
-        val scenario = launch(TestUpdateActivity::class.java)
+        val scenario = launchActivityForResult(TestUpdateActivity::class.java)
         scenario.onActivity {
             updateManager = FakeAppUpdateManager(it).apply {
                 setUpdateAvailable(100500)
@@ -102,7 +102,7 @@ class FlexibleUpdateKtTest: TestAppTest() {
     fun willNotAskUpdateConsentIfAlreadyCancelled() {
         whenever(flowBreaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
         lateinit var updateManager: FakeAppUpdateManager
-        val scenario = launch(TestUpdateActivity::class.java)
+        val scenario = launchActivityForResult(TestUpdateActivity::class.java)
         scenario.onActivity {
             updateManager = FakeAppUpdateManager(it).apply {
                 setUpdateAvailable(100500)
