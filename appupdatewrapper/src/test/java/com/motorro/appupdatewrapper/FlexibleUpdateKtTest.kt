@@ -19,8 +19,6 @@ import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.core.app.ActivityScenario.launchActivityForResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
@@ -48,19 +46,21 @@ class FlexibleUpdateKtTest: TestAppTest() {
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
     fun startsFlexibleUpdateIfAvailable() {
-        lateinit var updateManager: FakeAppUpdateManager
+        lateinit var updateManager: FakeUpdateManagerWithContract
         val scenario = launchActivityForResult(TestUpdateActivity::class.java)
-        scenario.onActivity {
-            updateManager = FakeAppUpdateManager(it).apply {
+        scenario.onActivity { activity ->
+            updateManager = FakeUpdateManagerWithContract(activity).apply {
                 setUpdateAvailable(100500)
             }
-            it.updateWrapper = it.startFlexibleUpdate(updateManager, it, flowBreaker)
+            // Emulate update is accepted
+            activity.createTestRegistry(Activity.RESULT_OK)
+            activity.updateWrapper = activity.startFlexibleUpdate(updateManager, activity, flowBreaker)
             shadowOf(getMainLooper()).idle()
             assertTrue(updateManager.isConfirmationDialogVisible)
 
             // Emulate update is accepted
             updateManager.userAcceptsUpdate()
-            it.passActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_OK)
+            updateManager.launchContract()
             shadowOf(getMainLooper()).idle()
 
             updateManager.downloadStarts()
@@ -76,19 +76,20 @@ class FlexibleUpdateKtTest: TestAppTest() {
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
     fun cancelsUpdateOnUserReject() {
-        lateinit var updateManager: FakeAppUpdateManager
+        lateinit var updateManager: FakeUpdateManagerWithContract
         val scenario = launchActivityForResult(TestUpdateActivity::class.java)
-        scenario.onActivity {
-            updateManager = FakeAppUpdateManager(it).apply {
+        scenario.onActivity { activity ->
+            updateManager = FakeUpdateManagerWithContract(activity).apply {
                 setUpdateAvailable(100500)
             }
-            it.updateWrapper = it.startFlexibleUpdate(updateManager, it, flowBreaker)
+            // Emulate update is rejected
+            activity.createTestRegistry(Activity.RESULT_CANCELED)
+            activity.updateWrapper = activity.startFlexibleUpdate(updateManager, activity, flowBreaker)
             shadowOf(getMainLooper()).idle()
             assertTrue(updateManager.isConfirmationDialogVisible)
 
-            // Emulate update is rejected
             updateManager.userRejectsUpdate()
-            it.passActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_CANCELED)
+            updateManager.launchContract()
             shadowOf(getMainLooper()).idle()
 
             verify(flowBreaker).saveTimeCanceled()
@@ -101,13 +102,15 @@ class FlexibleUpdateKtTest: TestAppTest() {
     @LooperMode(LooperMode.Mode.PAUSED)
     fun willNotAskUpdateConsentIfAlreadyCancelled() {
         whenever(flowBreaker.isEnoughTimePassedSinceLatestCancel()).thenReturn(false)
-        lateinit var updateManager: FakeAppUpdateManager
+        lateinit var updateManager: FakeUpdateManagerWithContract
         val scenario = launchActivityForResult(TestUpdateActivity::class.java)
-        scenario.onActivity {
-            updateManager = FakeAppUpdateManager(it).apply {
+        scenario.onActivity { activity ->
+            updateManager = FakeUpdateManagerWithContract(activity).apply {
                 setUpdateAvailable(100500)
             }
-            it.updateWrapper = it.startFlexibleUpdate(updateManager, it, flowBreaker)
+            // Emulate update is accepted
+            activity.createTestRegistry(Activity.RESULT_OK)
+            activity.updateWrapper = activity.startFlexibleUpdate(updateManager, activity, flowBreaker)
             shadowOf(getMainLooper()).idle()
             assertFalse(updateManager.isConfirmationDialogVisible)
 

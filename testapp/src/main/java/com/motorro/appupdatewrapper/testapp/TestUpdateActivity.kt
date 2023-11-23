@@ -15,9 +15,11 @@
 
 package com.motorro.appupdatewrapper.testapp
 
-import android.app.Activity
-import android.content.Intent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityOptionsCompat
 import com.motorro.appupdatewrapper.AppUpdateView
 import com.motorro.appupdatewrapper.AppUpdateWrapper
 
@@ -31,26 +33,24 @@ class TestUpdateActivity : AppCompatActivity(), AppUpdateView {
     }
 
     lateinit var updateWrapper: AppUpdateWrapper
+    private lateinit var resultRegistry: ActivityResultRegistry
 
     // To pass 'activity result' as fake update manager does not start activities
-    fun passActivityResult(requestCode: Int, resultCode: Int) {
-        @Suppress("DEPRECATION")
-        onActivityResult(requestCode, resultCode, null)
-    }
-
-    // Passes an activity result to wrapper to check for play-core interaction
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        @Suppress("DEPRECATION")
-        super.onActivityResult(requestCode, resultCode, data)
-        if (updateWrapper.checkActivityResult(requestCode, resultCode)) {
-            // Result handled and processed
-            return
+    fun createTestRegistry(resultCode: Int) {
+        resultRegistry = object : ActivityResultRegistry() {
+            override fun <I, O> onLaunch(
+                requestCode: Int,
+                contract: ActivityResultContract<I, O>,
+                input: I,
+                options: ActivityOptionsCompat?
+            ) {
+                dispatchResult(requestCode, ActivityResult(resultCode, null))
+            }
         }
-        // Process your request codes
     }
 
     // AppUpdateView implementation
-    override val activity: Activity get() = this
+    override val resultContractRegistry: ActivityResultRegistry get() = resultRegistry
     override fun updateReady() {
         updateWrapper.userConfirmedUpdate()
     }

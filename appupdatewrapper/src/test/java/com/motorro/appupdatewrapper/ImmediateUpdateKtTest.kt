@@ -19,8 +19,6 @@ import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.core.app.ActivityScenario.launchActivityForResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,18 +32,19 @@ class ImmediateUpdateKtTest: TestAppTest() {
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
     fun startsImmediateUpdateIfAvailable() {
-        lateinit var updateManager: FakeAppUpdateManager
+        lateinit var updateManager: FakeUpdateManagerWithContract
         val scenario = launchActivityForResult(TestUpdateActivity::class.java)
-        scenario.onActivity {
-            updateManager = FakeAppUpdateManager(it).apply {
+        scenario.onActivity { activity ->
+            updateManager = FakeUpdateManagerWithContract(activity).apply {
                 setUpdateAvailable(100500)
             }
-            it.updateWrapper = it.startImmediateUpdate(updateManager, it)
+            // Emulate update success
+            activity.createTestRegistry(Activity.RESULT_OK)
+            activity.updateWrapper = activity.startImmediateUpdate(updateManager, activity)
             shadowOf(getMainLooper()).idle()
 
             assertTrue(updateManager.isImmediateFlowVisible)
-            // Emulate update success
-            it.passActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_OK)
+            updateManager.launchContract()
 
             assertEquals(TestUpdateActivity.RESULT_SUCCESS, scenario.result.resultCode)
         }
@@ -54,13 +53,15 @@ class ImmediateUpdateKtTest: TestAppTest() {
     @Test
     @LooperMode(LooperMode.Mode.PAUSED)
     fun failsIfUpdateIsNotAvailable() {
-        lateinit var updateManager: FakeAppUpdateManager
+        lateinit var updateManager: FakeUpdateManagerWithContract
         val scenario = launchActivityForResult(TestUpdateActivity::class.java)
-        scenario.onActivity {
-            updateManager = FakeAppUpdateManager(it).apply {
+        scenario.onActivity { activity ->
+            updateManager = FakeUpdateManagerWithContract(activity).apply {
                 setUpdateNotAvailable()
             }
-            it.startImmediateUpdate(updateManager, it)
+            // Emulate update success
+            activity.createTestRegistry(Activity.RESULT_OK)
+            activity.startImmediateUpdate(updateManager, activity)
             shadowOf(getMainLooper()).idle()
         }
 

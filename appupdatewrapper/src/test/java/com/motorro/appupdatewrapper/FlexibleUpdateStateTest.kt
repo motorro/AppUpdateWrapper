@@ -24,7 +24,6 @@ import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,16 +38,9 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun baseStateWillMarkCancellationTimeAndCompleteIfCancelled() {
         val state = FlexibleUpdateState.Initial().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_CANCELED))
+        assertTrue(state.checkActivityResult(Activity.RESULT_CANCELED))
         verify(stateMachine.flowBreaker).saveTimeCanceled()
         verify(stateMachine).setUpdateState(any<Done>())
-    }
-
-    @Test
-    fun baseStateWillNotHandleOtherRequests() {
-        val state = FlexibleUpdateState.Initial().init()
-        assertFalse(state.checkActivityResult(10, Activity.RESULT_OK))
-        verify(stateMachine, never()).setUpdateState(any())
     }
 
     @Test
@@ -362,14 +354,14 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun updateConsentCheckStateWillSetDownloadingIfConfirmed() {
         val state = FlexibleUpdateState.UpdateConsentCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_OK))
+        assertTrue(state.checkActivityResult(Activity.RESULT_OK))
         verify(stateMachine).setUpdateState(any<FlexibleUpdateState.Downloading>())
     }
 
     @Test
     fun updateConsentCheckStateWillMarkCancellationTimeAndCompleteIfCancelled() {
         val state = FlexibleUpdateState.UpdateConsentCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_CANCELED))
+        assertTrue(state.checkActivityResult(Activity.RESULT_CANCELED))
         verify(stateMachine, never()).setUpdateState(any<FlexibleUpdateState.Downloading>())
         verify(stateMachine, never()).setUpdateState(any<Error>())
         verify(stateMachine.flowBreaker).saveTimeCanceled()
@@ -377,16 +369,9 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     }
 
     @Test
-    fun updateConsentCheckStateWillNotHandleOtherRequests() {
-        val state = FlexibleUpdateState.UpdateConsentCheck().init()
-        assertFalse(state.checkActivityResult(10, Activity.RESULT_OK))
-        verify(stateMachine, never()).setUpdateState(any())
-    }
-
-    @Test
     fun updateConsentCheckStateWillReportUpdateError() {
         val state = FlexibleUpdateState.UpdateConsentCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, ActivityResult.RESULT_IN_APP_UPDATE_FAILED))
+        assertTrue(state.checkActivityResult(ActivityResult.RESULT_IN_APP_UPDATE_FAILED))
         verify(stateMachine, never()).setUpdateState(any<Done>())
         verify(stateMachine).setUpdateState(check {
             it as Error
@@ -397,7 +382,7 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun updateConsentCheckStateWillReportErrorOnUnknownResult() {
         val state = FlexibleUpdateState.UpdateConsentCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.CONTEXT_RESTRICTED))
+        assertTrue(state.checkActivityResult(Activity.CONTEXT_RESTRICTED))
         verify(stateMachine, never()).setUpdateState(any<Done>())
         verify(stateMachine).setUpdateState(check {
             it as Error

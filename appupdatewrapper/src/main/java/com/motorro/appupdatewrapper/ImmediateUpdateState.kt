@@ -17,13 +17,13 @@ package com.motorro.appupdatewrapper
 
 import android.app.Activity
 import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType.IMMEDIATE
 import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_NO_IMMEDIATE_UPDATE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
-import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 
 /**
  * Immediate update flow
@@ -170,9 +170,8 @@ internal sealed class ImmediateUpdateState: AppUpdateState(), Tagged {
 
                 updateManager.startUpdateFlowForResult(
                     updateInfo,
-                    IMMEDIATE,
-                    activity,
-                    REQUEST_CODE_UPDATE
+                    stateMachine.launcher,
+                    AppUpdateOptions.newBuilder(IMMEDIATE).build()
                 )
                 updateInstallUiVisible()
             }
@@ -187,12 +186,8 @@ internal sealed class ImmediateUpdateState: AppUpdateState(), Tagged {
          * Checks activity result and returns `true` if result is an update result and was handled
          * Use to check update activity result in [android.app.Activity.onActivityResult]
          */
-        override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
-            timber.d("checkActivityResult: requestCode(%d), resultCode(%d)", requestCode, resultCode)
-            if (REQUEST_CODE_UPDATE != requestCode) {
-                return false
-            }
-
+        override fun checkActivityResult(resultCode: Int): Boolean {
+            timber.d("checkActivityResult: resultCode(%d)", resultCode)
             if (Activity.RESULT_OK == resultCode) {
                 timber.d("Update installation complete")
                 complete()

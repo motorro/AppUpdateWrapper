@@ -16,14 +16,16 @@
 package com.motorro.appupdatewrapper
 
 import com.google.android.play.core.appupdate.AppUpdateManager
+import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_KEY_UPDATE
 
 /**
  * Wraps [AppUpdateManager] interaction.
  * The update wrapper is designed to be a single-use object. It carries out the workflow using host
  * [androidx.lifecycle.Lifecycle] and terminates in either [AppUpdateView.updateComplete] or
  * [AppUpdateView.updateFailed].
- * [AppUpdateManager] pops up activities-for-result from time to time. To check if the activity result belongs to update
- * flow call [checkActivityResult] function of update wrapper in your hosting activity.
+ * [AppUpdateManager] pops up activities-for-result from time to time. That is why [AppUpdateView.resultContractRegistry].
+ * The library registers the contract itself. If you need to change contract key - set [REQUEST_KEY_UPDATE]
+ * to the desired one
  */
 interface AppUpdateWrapper {
     companion object {
@@ -37,16 +39,10 @@ interface AppUpdateWrapper {
         var USE_SAFE_LISTENERS = false
 
         /**
-         * The request code wrapper uses to run [AppUpdateManager.startUpdateFlowForResult]
+         * The request key wrapper uses to register [AppUpdateManager] contract
          */
-        var REQUEST_CODE_UPDATE = REQUEST_CODE_UPDATE_DEFAULT
+        var REQUEST_KEY_UPDATE = REQUEST_KEY_UPDATE_DEFAULT
     }
-
-    /**
-     * Checks activity result and returns `true` if result is an update result and was handled
-     * Use to check update activity result in [android.app.Activity.onActivityResult]
-     */
-    fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean
 
     /**
      * Cancels update installation

@@ -1,9 +1,9 @@
 package com.motorro.appupdatewrapper.sample
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultRegistry
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.motorro.appupdatewrapper.AppUpdateView
@@ -13,7 +13,7 @@ import com.motorro.appupdatewrapper.UpdateFlowBreaker.Companion.withUpdateValueC
 import com.motorro.appupdatewrapper.sample.databinding.ActivityMainBinding
 import com.motorro.appupdatewrapper.startFlexibleUpdate
 
-class MainActivity : AppCompatActivity(), AppUpdateView {
+class MainActivity : ComponentActivity(), AppUpdateView {
     /**
      * View
      */
@@ -50,12 +50,11 @@ class MainActivity : AppCompatActivity(), AppUpdateView {
     }
 
     /**
-     * Returns hosting activity for update process
-     * Call [AppUpdateState.checkActivityResult] in [Activity.onActivityResult] to
-     * check update status
-     * @see AppUpdateState.checkActivityResult
+     * Returns result contract registry
+     * Wrapper will register an activity result contract to listen to update state
+     * Pass [ComponentActivity.activityResultRegistry] or other registry to it
      */
-    override val activity: Activity = this
+    override val resultContractRegistry: ActivityResultRegistry = this.activityResultRegistry
 
     /**
      * Called when update is checking or downloading data

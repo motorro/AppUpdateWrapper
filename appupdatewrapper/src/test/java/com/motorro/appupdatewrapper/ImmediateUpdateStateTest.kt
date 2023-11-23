@@ -27,14 +27,12 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_NO_IMMEDIATE_UPDATE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
-import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -205,21 +203,14 @@ internal class ImmediateUpdateStateTest: BaseAppUpdateStateTest() {
     @Test
     fun updateUiCheckStateWillCompleteIfUpdateSucceeds() {
         val state = ImmediateUpdateState.UpdateUiCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, Activity.RESULT_OK))
+        assertTrue(state.checkActivityResult(Activity.RESULT_OK))
         verify(stateMachine).setUpdateState(any<Done>())
-    }
-
-    @Test
-    fun updateUiCheckStateWillNotHandleOtherRequests() {
-        val state = ImmediateUpdateState.UpdateUiCheck().init()
-        assertFalse(state.checkActivityResult(10, Activity.RESULT_OK))
-        verify(stateMachine, never()).setUpdateState(any())
     }
 
     @Test
     fun updateUiCheckStateWillFailOnNotOkResult() {
         val state = ImmediateUpdateState.UpdateUiCheck().init()
-        assertTrue(state.checkActivityResult(REQUEST_CODE_UPDATE, ActivityResult.RESULT_IN_APP_UPDATE_FAILED))
+        assertTrue(state.checkActivityResult(ActivityResult.RESULT_IN_APP_UPDATE_FAILED))
         verify(stateMachine, never()).setUpdateState(any<Done>())
         verify(stateMachine).setUpdateState(check {
             it as Failed
