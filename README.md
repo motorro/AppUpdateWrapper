@@ -47,7 +47,7 @@ to simplify in-app update flow.
 -   Flexible updates are non-intrusive for app users with [UpdateFlowBreaker](#non-intrusive-flexible-updates-with-updateflowbreaker).
     
 ## Basics
-Refer to [original documentation](https://developer.android.com/guide/app-bundle/in-app-updates) to understand 
+Refer to [original documentation](https://developer.android.com/guide/playcore/in-app-updates) to understand 
 the basics of in-app update. This library consists of two counterparts:
 -   [AppUpdateWrapper](appupdatewrapper/src/main/java/com/motorro/appupdatewrapper/AppUpdateWrapper.kt) is a presenter 
     (or presentation model to some extent) that is responsible for carrying out the `IMMEDIATE` or `FLEXIBLE` update 
@@ -94,7 +94,7 @@ class TestActivity : AppCompatActivity(), AppUpdateView {
     /********************************/
 
     // AppUpdateManager needs your activity to start dialogs
-    override val activity: Activity get() = this
+    override val resultContractRegistry: ActivityResultRegistry = this.activityResultRegistry
 
     // Called when flow starts
     override fun updateChecking() {
@@ -142,13 +142,13 @@ dependencies {
 application and `AppUpdateWrapper`. You may directly extend it in your hosting `Activity` or delegate it to some 
 fragment. Here are the methods you may implement:
 
-#### activity (mandatory)
+#### resultContractRegistry (mandatory)
 ```kotlin 
-val activity: Activity
+val resultContractRegistry: ActivityResultRegistry
 ```
- `AppUpdateManager` launches activities on behalf of your application. Implement this value to pass the activity that 
-will handle the `onActivityResult` and pass data to `AppUpdateWrapper.checkActivityResult`. Refer to method 
-[documentation](#checkactivityresult) to get the details.
+ `AppUpdateManager` launches activities on behalf of your application. Implement this value to pass the activity 
+result registry that will handle the `onActivityResult`. Typically you pass your activity  `activityResultRegistry`
+there.
 
 #### updateReady (mandatory)
 ```kotlin
@@ -176,7 +176,7 @@ Called by presenter when update flow starts. UI may display a spinner of some ki
 ```kotlin
 fun updateDownloadStarts()
 ```
-Called by presenter user confirms flexible update and background download begins. 
+Called when user confirms flexible update and background download begins. 
 Called in flexible flow.
 
 #### updateInstallUiVisible (optional)
@@ -211,19 +211,6 @@ The library supports both `IMMEDIATE` and `FLEXIBLE` update flows.
     details.
 
 Both flows implement the `AppUpdateWrapper` interface with the following methods to consider:
-
-#### checkActivityResult
-```kotlin
-fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean
-```
-`AppUpdateManager` launches some activities from time to time: to ask for update consent, to install, etc. It does so 
-on behalf of your calling activity. Thus you must implement `onActivityResult` at your side and pass data to this method.
-If `checkActivityResult` returns true - then the result was handled. See the sample at the [top](#basics) of the article.
-In case your activity already uses the [request code](appupdatewrapper/src/main/java/com/motorro/appupdatewrapper/constants.kt#L23) 
-used for application updates you can set a new one by setting a static var:
-```kotlin
-AppUpdateWrapper.REQUEST_CODE_UPDATE = 1111
-```
 
 #### userCanceledUpdate and userConfirmedUpdate
 ```kotlin

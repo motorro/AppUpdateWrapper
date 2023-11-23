@@ -138,7 +138,7 @@ internal abstract class AppUpdateState: AppUpdateWrapper, Tagged {
      * Checks activity result and returns `true` if result is an update result and was handled
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
-    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean = false
+    open fun checkActivityResult(resultCode: Int): Boolean = false
 
     /**
      * Cancels update installation

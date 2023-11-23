@@ -15,7 +15,8 @@
 
 package com.motorro.appupdatewrapper
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.Lifecycle.State.RESUMED
 
 /**
@@ -32,12 +33,11 @@ import androidx.lifecycle.Lifecycle.State.RESUMED
  */
 interface AppUpdateView {
     /**
-     * Returns hosting activity for update process
-     * Call [AppUpdateState.checkActivityResult] in [Activity.onActivityResult] to
-     * check update status
-     * @see AppUpdateState.checkActivityResult
+     * Returns result contract registry
+     * Wrapper will register an activity result contract to listen to update state
+     * Pass [ComponentActivity.activityResultRegistry] or other registry to it
      */
-    val activity: Activity
+    val resultContractRegistry: ActivityResultRegistry
 
     /**
      * Called when update is checking or downloading data

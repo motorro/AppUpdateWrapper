@@ -18,18 +18,24 @@ package com.motorro.appupdatewrapper
 import android.app.Activity
 import androidx.annotation.CallSuper
 import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.ActivityResult.RESULT_IN_APP_UPDATE_FAILED
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED
 import com.google.android.play.core.install.model.InstallErrorCode.ERROR_INSTALL_UNAVAILABLE
-import com.google.android.play.core.install.model.InstallStatus.*
+import com.google.android.play.core.install.model.InstallStatus.CANCELED
+import com.google.android.play.core.install.model.InstallStatus.DOWNLOADED
+import com.google.android.play.core.install.model.InstallStatus.DOWNLOADING
+import com.google.android.play.core.install.model.InstallStatus.FAILED
+import com.google.android.play.core.install.model.InstallStatus.INSTALLED
+import com.google.android.play.core.install.model.InstallStatus.INSTALLING
+import com.google.android.play.core.install.model.InstallStatus.PENDING
 import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UNKNOWN_UPDATE_RESULT
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_TYPE_NOT_ALLOWED
-import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_CODE_UPDATE
 
 /**
  * Flexible update flow
@@ -102,9 +108,9 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
      * takes place. This may prevent download consent popup if activity was recreated during consent display
      */
     @CallSuper
-    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
-        timber.d("checkActivityResult: requestCode(%d), resultCode(%d)", requestCode, resultCode)
-        return if (REQUEST_CODE_UPDATE == requestCode && Activity.RESULT_CANCELED == resultCode) {
+    override fun checkActivityResult(resultCode: Int): Boolean {
+        timber.d("checkActivityResult: resultCode(%d)", resultCode)
+        return if (Activity.RESULT_CANCELED == resultCode) {
             timber.d("Update download cancelled")
             markUserCancelTime()
             complete()
@@ -236,9 +242,8 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
 
                     stateMachine.updateManager.startUpdateFlowForResult(
                         updateInfo,
-                        FLEXIBLE,
-                        activity,
-                        REQUEST_CODE_UPDATE
+                        stateMachine.launcher,
+                        AppUpdateOptions.newBuilder(FLEXIBLE).build()
                     )
                 }
             }
@@ -253,9 +258,8 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
          * Checks activity result and returns `true` if result is an update result and was handled
          * Use to check update activity result in [android.app.Activity.onActivityResult]
          */
-        override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean = when {
-            super.checkActivityResult(requestCode, resultCode) -> true
-            REQUEST_CODE_UPDATE != requestCode -> false
+        override fun checkActivityResult(resultCode: Int): Boolean = when {
+            super.checkActivityResult(resultCode) -> true
             else -> {
                 when(resultCode) {
                     Activity.RESULT_OK -> {

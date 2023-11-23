@@ -24,8 +24,8 @@ import timber.log.Timber
  * Starts flexible update
  * Use to check for updates parallel to main application flow.
  *
- * If update found gets [AppUpdateView.activity] and starts play-core update consent on behalf of your activity.
- * Therefore you should pass an activity result to the [AppUpdateWrapper.checkActivityResult] for check.
+ * If update found gets [AppUpdateView.resultContractRegistry] and starts play-core update consent on behalf of your activity.
+ * Therefore you need to implement a result registry in your view.
  * Whenever the update is downloaded wrapper will call [AppUpdateView.updateReady]. At this point your view
  * should ask if user is ready to restart application.
  * Then call one of the continuation methods: [AppUpdateWrapper.userConfirmedUpdate] or [AppUpdateWrapper.userCanceledUpdate]

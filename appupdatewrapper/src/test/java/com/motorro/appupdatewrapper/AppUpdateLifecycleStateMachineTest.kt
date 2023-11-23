@@ -15,10 +15,14 @@
 
 package com.motorro.appupdatewrapper
 
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.State.INITIALIZED
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
@@ -32,13 +36,25 @@ import kotlin.test.assertTrue
 @RunWith(AndroidJUnit4::class)
 class AppUpdateLifecycleStateMachineTest: TestAppTest() {
     private lateinit var lifecycleOwner: TestLifecycleOwner
+    private lateinit var registry: ActivityResultRegistry
     private lateinit var stateMachine: AppUpdateLifecycleStateMachine
     private lateinit var state: AppUpdateState
 
     @Before
     fun init() {
+        registry = object : ActivityResultRegistry() {
+            override fun <I : Any?, O : Any?> onLaunch(
+                requestCode: Int,
+                contract: ActivityResultContract<I, O>,
+                input: I,
+                options: ActivityOptionsCompat?
+            ) = Unit
+        }
+        val view: AppUpdateView = mock {
+            on { this.resultContractRegistry } doReturn registry
+        }
         lifecycleOwner = TestLifecycleOwner(INITIALIZED)
-        stateMachine = AppUpdateLifecycleStateMachine(lifecycleOwner.lifecycle, mock(), mock(), mock())
+        stateMachine = AppUpdateLifecycleStateMachine(lifecycleOwner.lifecycle, mock(), view, mock())
 
         state = spy()
     }

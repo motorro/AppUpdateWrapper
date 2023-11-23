@@ -15,12 +15,10 @@
 
 package com.motorro.appupdatewrapper
 
-import androidx.annotation.VisibleForTesting
-
 /**
  * Request code for update manager
  */
-const val REQUEST_CODE_UPDATE_DEFAULT = 1050
+const val REQUEST_KEY_UPDATE_DEFAULT = "AppUpdateWrapper"
 
 /**
  * SharedPreferences storage key for the time update was cancelled

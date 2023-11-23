@@ -15,11 +15,15 @@
 
 package com.motorro.appupdatewrapper
 
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.play.core.appupdate.AppUpdateManager
+import com.motorro.appupdatewrapper.AppUpdateWrapper.Companion.REQUEST_KEY_UPDATE
 
 /**
  * App update state machine
@@ -39,6 +43,11 @@ internal interface AppUpdateStateMachine {
      * Update view
      */
     val view: AppUpdateView
+
+    /**
+     * Update request launcher
+     */
+    val launcher: ActivityResultLauncher<IntentSenderRequest>
 
     /**
      * Sets new update state
@@ -64,6 +73,12 @@ internal class AppUpdateLifecycleStateMachine(
      */
     @VisibleForTesting
     var currentUpdateState: AppUpdateState
+
+    /**
+     * Update request launcher
+     */
+    override lateinit var launcher: ActivityResultLauncher<IntentSenderRequest>
+        private set
 
     init {
         currentUpdateState = None()
@@ -94,6 +109,9 @@ internal class AppUpdateLifecycleStateMachine(
     }
 
     override fun onStart(owner: LifecycleOwner) {
+        launcher = view.resultContractRegistry.register(REQUEST_KEY_UPDATE, StartIntentSenderForResult()) {
+            checkActivityResult(it.resultCode)
+        }
         currentUpdateState.onStart()
     }
 
@@ -109,13 +127,17 @@ internal class AppUpdateLifecycleStateMachine(
         currentUpdateState.onStop()
     }
 
+    override fun onDestroy(owner: LifecycleOwner) {
+        launcher.unregister()
+    }
+
     /**
      * Checks activity result and returns `true` if result is an update result and was handled
      * Use to check update activity result in [android.app.Activity.onActivityResult]
      */
-    override fun checkActivityResult(requestCode: Int, resultCode: Int): Boolean {
-        timber.d("Processing activity result: requestCode(%d), resultCode(%d)", requestCode, resultCode)
-        return currentUpdateState.checkActivityResult(requestCode, resultCode).also {
+    private fun checkActivityResult(resultCode: Int): Boolean {
+        timber.d("Processing activity result: resultCode(%d)", resultCode)
+        return currentUpdateState.checkActivityResult(resultCode).also {
             timber.d("Activity result handled: %b", it)
         }
     }
@@ -143,6 +165,9 @@ internal class AppUpdateLifecycleStateMachine(
      */
     override fun cleanup() {
         lifecycle.removeObserver(this)
+        if (this::launcher.isInitialized) {
+            launcher.unregister()
+        }
         currentUpdateState = None()
         timber.d("Cleaned-up!")
     }

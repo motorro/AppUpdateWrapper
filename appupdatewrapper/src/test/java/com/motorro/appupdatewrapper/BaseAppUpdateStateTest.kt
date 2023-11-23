@@ -15,7 +15,7 @@
 
 package com.motorro.appupdatewrapper
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -24,7 +24,7 @@ import com.nhaarman.mockitokotlin2.spy
 import org.junit.Before
 
 internal abstract class BaseAppUpdateStateTest: TestAppTest() {
-    protected lateinit var activity: Activity
+    protected lateinit var activity: ComponentActivity
     protected lateinit var view: AppUpdateView
     protected lateinit var stateMachine: AppUpdateStateMachine
     protected lateinit var updateManager: FakeAppUpdateManager
@@ -34,7 +34,7 @@ internal abstract class BaseAppUpdateStateTest: TestAppTest() {
     fun init() {
         activity = mock()
         view = mock {
-            on { activity } doReturn activity
+            on { resultContractRegistry } doReturn mock()
         }
         updateManager = spy(FakeAppUpdateManager(application))
         breaker = mock {
