@@ -4,7 +4,7 @@ apply from: 'gradle/maven-publish-config.gradle'
 apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
 buildscript {
-    ext.kotlin_version = '2.0.0'
+    ext.kotlin_version = '2.0.10'
     ext.dokka_version = '1.9.20'
     repositories {
         google()
