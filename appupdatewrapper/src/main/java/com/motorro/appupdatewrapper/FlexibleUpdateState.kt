@@ -295,6 +295,12 @@ internal sealed class FlexibleUpdateState : AppUpdateState(), Tagged {
                     markUserCancelTime()
                     complete()
                 }
+                DOWNLOADING -> withUpdateView {
+                    updateDownloadProgress(
+                        state.bytesDownloaded(),
+                        state.totalBytesToDownload()
+                    )
+                }
                 DOWNLOADED -> installConsent()
                 INSTALLING -> completeUpdate()
                 FAILED -> {
