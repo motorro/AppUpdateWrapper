@@ -24,7 +24,15 @@ import com.google.android.play.core.install.model.ActivityResult
 import com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.check
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
@@ -257,6 +265,27 @@ internal class FlexibleUpdateStateTest: BaseAppUpdateStateTest() {
             userCancelsDownload()
             verify(stateMachine).setUpdateState(any<Done>())
             verify(breaker).saveTimeCanceled()
+        }
+        shadowOf(getMainLooper()).idle()
+    }
+
+    @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
+    fun downloadingStateWillUpdateProgress() {
+        updateManager.setUpdateAvailable(100500)
+        updateManager.withInfo {
+            startUpdateFlowForResult(it, FLEXIBLE, activity, 100)
+            assertTrue(isConfirmationDialogVisible)
+            userAcceptsUpdate()
+            downloadStarts()
+            setTotalBytesToDownload(100)
+
+            val state = FlexibleUpdateState.Downloading().init()
+            state.onResume()
+            shadowOf(getMainLooper()).idle()
+
+            setBytesDownloaded(50)
+            verify(view).updateDownloadProgress(50, 100)
         }
         shadowOf(getMainLooper()).idle()
     }

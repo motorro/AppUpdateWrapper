@@ -56,6 +56,13 @@ interface AppUpdateView {
     fun updateDownloadStarts() = Unit
 
     /**
+     * Called when update download progress changes
+     * @param bytesLoaded Bytes loaded
+     * @param bytesTotal Total bytes to load
+     */
+    fun updateDownloadProgress(bytesLoaded: Long, bytesTotal: Long) = Unit
+
+    /**
      * Reports update is downloaded and ready to be installed
      * When ready to proceed call [AppUpdateState.userConfirmedUpdate]
      * Called in flexible flow

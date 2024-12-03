@@ -166,6 +166,15 @@ fun updateFailed(e: Throwable)
 Effective within the `IMMEDIATE` update flow to report a critical update error. Within the immediate update flow this is
 considered critical and you may want to terminate application.
 
+#### updateDownloadProgress (optional)
+```kotlin
+fun updateDownloadProgress(bytesLoaded: Long, bytesTotal: Long)
+```
+Called in flexible flow to report that update download progress. You may display a progress bar or something.
+
+ - bytesLoaded - number of bytes downloaded
+ - bytesTotal - total number of bytes to download
+
 #### updateChecking (optional)
 ```kotlin
 fun updateChecking()
