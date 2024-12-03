@@ -65,9 +65,9 @@ dependencies {
 
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    api 'androidx.core:core-ktx:1.13.1'
-    api 'androidx.lifecycle:lifecycle-common:2.8.4'
-    api 'androidx.activity:activity-ktx:1.9.1'
+    api 'androidx.core:core-ktx:1.15.0'
+    api 'androidx.lifecycle:lifecycle-common:2.8.7'
+    api 'androidx.activity:activity-ktx:1.9.3'
     api 'com.google.android.play:app-update:2.1.0'
     api 'com.google.android.play:app-update-ktx:2.1.0'
 
@@ -80,7 +80,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
     testImplementation 'org.robolectric:robolectric:4.13'
-    testImplementation 'androidx.lifecycle:lifecycle-runtime-testing:2.8.4'
+    testImplementation 'androidx.lifecycle:lifecycle-runtime-testing:2.8.7'
 }
 
 dokkaJavadoc.configure {
