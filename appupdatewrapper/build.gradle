@@ -96,7 +96,14 @@ def libId = 'appupdatewrapper'
 def libName = 'appupdatewrapper'
 def libDesc = 'A wrapper for Android `AppUpdateManager` to encapsulate update workflow.'
 
+
 afterEvaluate {
+
+    signing {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications
+    }
+
     publishing {
         publications {
             // Creates a Maven publication called "release".
@@ -131,20 +138,5 @@ afterEvaluate {
                 }
             }
         }
-        repositories {
-            maven {
-                name = "sonatype"
-                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username ossrhUsername
-                    password ossrhPassword
-                }
-            }
-        }
-    }
-
-    signing {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign publishing.publications
     }
 }
