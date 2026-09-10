@@ -4,7 +4,7 @@ apply from: 'gradle/maven-publish-config.gradle'
 apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
 buildscript {
-    ext.kotlin_version = '2.2.0'
+    ext.kotlin_version = '2.4.20'
     ext.dokka_version = '2.0.0'
     repositories {
         google()
@@ -21,9 +21,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.11.1'
+        classpath 'com.android.tools.build:gradle:9.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'org.ajoberstar.grgit:grgit-gradle:5.3.0'
+        classpath 'org.ajoberstar.grgit:grgit-gradle:5.3.3'
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         classpath "io.github.gradle-nexus:publish-plugin:2.0.0"
     }
@@ -32,9 +32,9 @@ buildscript {
 
 ext {
     // Android
-    androidMinSdkVersion = 21
-    androidTargetSdkVersion = 36
-    androidCompileSdkVersion = 36
+    androidMinSdkVersion = 23
+    androidTargetSdkVersion = 37
+    androidCompileSdkVersion = 37
     versionName = project.version
     versionCode = buildVersionCode()
 

@@ -1,5 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 
 repositories {
     google()
@@ -9,26 +9,33 @@ repositories {
 android {
     compileSdk androidCompileSdkVersion
     testOptions.unitTests.includeAndroidResources = true
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+    testOptions {
+        targetSdk 36
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
     }
 
     defaultConfig {
         minSdkVersion androidMinSdkVersion
-        targetSdkVersion androidTargetSdkVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     namespace 'com.motorro.appupdatewrapper.testapp'
+    lint {
+        targetSdk 37
+    }
 }
 
 dependencies {
     implementation project(":appupdatewrapper")
-    api 'androidx.appcompat:appcompat:1.7.1'
+    api 'androidx.appcompat:appcompat:1.8.0'
 }
