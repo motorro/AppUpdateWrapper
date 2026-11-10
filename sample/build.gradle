@@ -1,16 +1,16 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id 'com.android.application'
+    alias(libs.plugins.android.application)
 }
 
 android {
-    compileSdk androidCompileSdkVersion
+    compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
         applicationId "com.motorro.appupdatewrapper.sample"
-        minSdkVersion androidMinSdkVersion
-        targetSdkVersion androidTargetSdkVersion
+        minSdkVersion libs.versions.minSdk.get().toInteger()
+        targetSdkVersion libs.versions.targetSdk.get().toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -48,9 +48,8 @@ android {
 
 dependencies {
     implementation project(":appupdatewrapper")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.19.0'
-    implementation 'androidx.appcompat:appcompat:1.8.0'
-    implementation 'com.google.android.material:material:1.14.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.constraintlayout
 }

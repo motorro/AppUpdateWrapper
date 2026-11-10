@@ -1,2 +1,17 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            name = 'ajoberstar-backup'
+            url = 'https://ajoberstar.github.io/bintray-backup/'
+        }
+        gradlePluginPortal()
+    }
+}
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
 include ':appupdatewrapper', ':testapp'
 include ':sample'

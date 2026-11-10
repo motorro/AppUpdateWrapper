@@ -1,16 +1,14 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-apply plugin: 'com.android.library'
 
-repositories {
-    google()
-    mavenCentral()
+plugins {
+    alias(libs.plugins.android.library)
 }
 
 android {
-    compileSdk androidCompileSdkVersion
+    compileSdk libs.versions.compileSdk.get().toInteger()
     testOptions.unitTests.includeAndroidResources = true
     testOptions {
-        targetSdk 36
+        targetSdk libs.versions.targetSdk.get().toInteger()
     }
 
     compileOptions {
@@ -25,17 +23,17 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion androidMinSdkVersion
+        minSdkVersion libs.versions.minSdk.get().toInteger()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     namespace 'com.motorro.appupdatewrapper.testapp'
     lint {
-        targetSdk 37
+        targetSdk libs.versions.targetSdk.get().toInteger()
     }
 }
 
 dependencies {
     implementation project(":appupdatewrapper")
-    api 'androidx.appcompat:appcompat:1.8.0'
+    api libs.androidx.appcompat
 }

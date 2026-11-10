@@ -1,40 +1,16 @@
-apply plugin: 'org.ajoberstar.grgit'
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.dokka) apply false
+    alias(libs.plugins.grgit)
+    alias(libs.plugins.nexus.publish)
+}
+
 apply from: 'gradle/versioning.gradle'
 apply from: 'gradle/maven-publish-config.gradle'
-apply plugin: 'io.github.gradle-nexus.publish-plugin'
-
-buildscript {
-    ext.kotlin_version = '2.4.20'
-    ext.dokka_version = '2.0.0'
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            name = 'ajoberstar-backup'
-            url = 'https://ajoberstar.github.io/bintray-backup/'
-        }
-        maven {
-            url="https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url="https://dl.bintray.com/kotlin/dokka"
-        }
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:9.2.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'org.ajoberstar.grgit:grgit-gradle:5.3.3'
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
-        classpath "io.github.gradle-nexus:publish-plugin:2.0.0"
-    }
-}
 
 
 ext {
-    // Android
-    androidMinSdkVersion = 23
-    androidTargetSdkVersion = 37
-    androidCompileSdkVersion = 37
     versionName = project.version
     versionCode = buildVersionCode()
 
