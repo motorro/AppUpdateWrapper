@@ -17,12 +17,12 @@ package com.motorro.appupdatewrapper
 
 import android.os.Handler
 import android.os.Looper.getMainLooper
-import com.google.android.play.core.appupdate.AppUpdateInfo
-import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
-import com.nhaarman.mockitokotlin2.spy
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
+import org.mockito.kotlin.spy
 import org.robolectric.annotation.LooperMode
 import java.util.*
 

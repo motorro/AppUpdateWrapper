@@ -17,11 +17,11 @@ package com.motorro.appupdatewrapper
 
 import androidx.activity.ComponentActivity
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
 import org.junit.Before
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 
 internal abstract class BaseAppUpdateStateTest: TestAppTest() {
     protected lateinit var activity: ComponentActivity

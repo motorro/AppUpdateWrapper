@@ -19,11 +19,11 @@ import android.app.Activity
 import android.os.Looper.getMainLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals

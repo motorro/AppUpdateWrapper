@@ -20,10 +20,14 @@ import android.os.Looper.getMainLooper
 import androidx.test.core.app.ActivityScenario.launchActivityForResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.motorro.appupdatewrapper.testapp.TestUpdateActivity
-import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals

@@ -27,9 +27,16 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_NO_IMMEDIATE_UPDATE
 import com.motorro.appupdatewrapper.AppUpdateException.Companion.ERROR_UPDATE_FAILED
-import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.check
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import kotlin.test.assertEquals

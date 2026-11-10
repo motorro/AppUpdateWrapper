@@ -22,11 +22,11 @@ import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
 import com.google.android.play.core.install.InstallState
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
-import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 

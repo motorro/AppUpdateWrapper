@@ -18,10 +18,16 @@ package com.motorro.appupdatewrapper
 import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
-import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.Shadows
 import org.robolectric.annotation.LooperMode
 import java.util.concurrent.TimeUnit
