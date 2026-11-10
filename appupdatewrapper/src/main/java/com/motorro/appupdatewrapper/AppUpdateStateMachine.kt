@@ -77,8 +77,9 @@ internal class AppUpdateLifecycleStateMachine(
     /**
      * Update request launcher
      */
-    override lateinit var launcher: ActivityResultLauncher<IntentSenderRequest>
-        private set
+    override val launcher = view.resultContractRegistry.register(REQUEST_KEY_UPDATE, StartIntentSenderForResult()) {
+        checkActivityResult(it.resultCode)
+    }
 
     init {
         currentUpdateState = None()
@@ -109,9 +110,6 @@ internal class AppUpdateLifecycleStateMachine(
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        launcher = view.resultContractRegistry.register(REQUEST_KEY_UPDATE, StartIntentSenderForResult()) {
-            checkActivityResult(it.resultCode)
-        }
         currentUpdateState.onStart()
     }
 
@@ -165,9 +163,7 @@ internal class AppUpdateLifecycleStateMachine(
      */
     override fun cleanup() {
         lifecycle.removeObserver(this)
-        if (this::launcher.isInitialized) {
-            launcher.unregister()
-        }
+        launcher.unregister()
         currentUpdateState = None()
         timber.d("Cleaned-up!")
     }
